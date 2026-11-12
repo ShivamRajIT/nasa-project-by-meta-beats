@@ -1,0 +1,17 @@
+{
+  "datasetId": "ocean",
+  "title": "Indian Ocean Thermal Expansion & Swell (1993–2025)",
+  "source": "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason Altimetry",
+  "unitPrimary": "°C (Sea Surface)",
+  "unitSecondary": "mm (Sea Level Rise)",
+  "records": [
+    { "index": 0, "date": "1993", "raw": { "primary": 26.8, "secondary": 0.0 }, "norm": { "pitch": 0.12, "intensity": 0.15 }, "explanation": "1993 TOPEX Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
+    { "index": 1, "date": "1997", "raw": { "primary": 27.3, "secondary": 14.2 }, "norm": { "pitch": 0.28, "intensity": 0.30 }, "explanation": "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
+    { "index": 2, "date": "2001", "raw": { "primary": 27.5, "secondary": 26.8 }, "norm": { "pitch": 0.36, "intensity": 0.38 }, "explanation": "2001: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
+    { "index": 3, "date": "2005", "raw": { "primary": 27.9, "secondary": 41.0 }, "norm": { "pitch": 0.50, "intensity": 0.50 }, "explanation": "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
+    { "index": 4, "date": "2010", "raw": { "primary": 28.4, "secondary": 58.5 }, "norm": { "pitch": 0.66, "intensity": 0.65 }, "explanation": "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
+    { "index": 5, "date": "2016", "raw": { "primary": 29.1, "secondary": 79.2 }, "norm": { "pitch": 0.84, "intensity": 0.82 }, "explanation": "2016 Coral Bleaching Peak: +0.7°C sudden jump! Sharp pitch rise and heavy vibrato." },
+    { "index": 6, "date": "2020", "raw": { "primary": 29.4, "secondary": 94.0 }, "norm": { "pitch": 0.92, "intensity": 0.90 }, "explanation": "2020: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
+    { "index": 7, "date": "2025", "raw": { "primary": 29.9, "secondary": 111.5 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Critical Thermal High: 29.9°C & +111.5mm rise. Peak frequency & maximum wave pulse." }
+  ]
+}

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NASA Earth Jukebox — Historical Climate Sonification</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --theme: #00f2fe;
+      --theme-glow: rgba(0, 242, 254, 0.35);
+      --bg-dark: #050814;
+      --card-bg: rgba(15, 23, 42, 0.78);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 20px;
+      background: radial-gradient(circle at top, #0f172a 0%, #030610 100%);
+      color: #f8fafc;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body.high-contrast {
+      background: #000000 !important;
+      --theme: #ffff00 !important;
+      --theme-glow: rgba(255, 255, 0, 0.6) !important;
+      --card-bg: #0a0a0a !important;
+    }
+
+    .container { max-width: 1080px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+
+    /* Top Header */
+    .header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;
+      padding: 16px 22px; background: var(--card-bg); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px; box-shadow: 0 0 25px var(--theme-glow); backdrop-filter: blur(12px);
+    }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .nasa-badge {
+      background: linear-gradient(135deg, #ef4444, #2563eb);
+      padding: 8px 14px; border-radius: 10px; font-weight: 900; letter-spacing: 1px; font-size: 14px;
+    }
+    .title { font-size: 24px; font-weight: 800; margin: 0; color: var(--theme); text-shadow: 0 0 12px var(--theme-glow); }
+    .subtitle { font-size: 13px; color: #94a3b8; margin: 3px 0 0 0; }
+
+    /* Track Selector Cards (Jukebox Slots) */
+    .jukebox-slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+    .slot-btn {
+      padding: 14px 18px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.12);
+      background: var(--card-bg); color: #e2e8f0; cursor: pointer; text-align: left;
+      transition: all 0.25s ease; display: flex; flex-direction: column; gap: 4px;
+    }
+    .slot-btn:hover { transform: translateY(-3px); border-color: var(--theme); }
+    .slot-btn.active {
+      background: linear-gradient(135deg, rgba(37,99,235,0.35), rgba(15,23,42,0.9));
+      border: 2px solid var(--theme); box-shadow: 0 0 20px var(--theme-glow);
+    }
+    .slot-tag { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--theme); font-weight: 700; }
+    .slot-name { font-size: 16px; font-weight: 700; }
+    .slot-sub { font-size: 12px; color: #94a3b8; }
+
+    /* Main Grid: Left Vinyl Jukebox + Right Chart */
+    .main-stage { display: grid; grid-template-columns: 320px 1fr; gap: 18px; }
+    @media (max-width: 820px) { .main-stage { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card-bg); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 16px; padding: 18px; backdrop-filter: blur(10px);
+    }
+
+    /* Spinning Vinyl Disc */
+    .vinyl-box { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; text-align: center; }
+    .vinyl-disc {
+      width: 170px; height: 170px; border-radius: 50%;
+      background: repeating-radial-gradient(#111 0, #111 4px, #222 5px, #111 6px);
+      border: 4px solid var(--theme);
+      box-shadow: 0 0 30px var(--theme-glow);
+      display: flex; align-items: center; justify-content: center;
+      position: relative; transition: box-shadow 0.3s ease;
+    }
+    .vinyl-disc.spinning { animation: spin 4s linear infinite; }
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+    .vinyl-center {
+      width: 62px; height: 62px; border-radius: 50%;
+      background: var(--theme); color: #050814; font-weight: 900; font-size: 15px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+    }
+
+    /* Animated Equalizer Bars */
+    .eq-bars { display: flex; align-items: flex-end; justify-content: center; gap: 4px; height: 48px; width: 100%; padding: 0 10px; }
+    .eq-bar {
+      flex: 1; background: var(--theme); border-radius: 3px 3px 0 0;
+      height: 15%; transition: height 0.18s ease, background-color 0.2s ease;
+      box-shadow: 0 0 8px var(--theme);
+    }
+
+    /* Live Pitch & Delta Telemetry Badges */
+    .telemetry-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    @media (max-width: 650px) { .telemetry-grid { grid-template-columns: repeat(2, 1fr); } }
+    .stat-box {
+      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+      padding: 10px 12px; border-radius: 12px; text-align: center;
+    }
+    .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; }
+    .stat-val { font-size: 18px; font-weight: 800; color: var(--theme); margin-top: 4px; }
+
+    /* Live Alert & Explanation Banner */
+    .readout-banner {
+      background: linear-gradient(90deg, rgba(15,23,42,0.95), rgba(30,41,59,0.9));
+      border-left: 5px solid var(--theme); padding: 16px 20px; border-radius: 12px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .readout-banner.spike-pulse {
+      box-shadow: 0 0 28px rgba(239, 68, 68, 0.7);
+      border-left-color: #ef4444;
+      transform: scale(1.01);
+    }
+    .anomaly-badge {
+      padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 800;
+      background: rgba(255,255,255,0.1); color: #e2e8f0;
+    }
+    .anomaly-badge.high { background: #ef4444; color: white; animation: blink 0.8s infinite alternate; }
+    @keyframes blink { from { opacity: 1; } to { opacity: 0.65; } }
+
+    /* Bottom Player Deck */
+    .controls-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    .btn {
+      padding: 10px 16px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.18);
+      background: #1e293b; color: white; font-weight: 700; cursor: pointer; transition: 0.2s;
+    }
+    .btn:hover { border-color: var(--theme); }
+    .btn.primary { background: var(--theme); color: #020617; border: none; box-shadow: 0 0 15px var(--theme-glow); }
+    .btn.active-opt { background: #2563eb; border-color: var(--theme); }
+    input[type="range"] { width: 100%; accent-color: var(--theme); cursor: pointer; margin-top: 12px; height: 8px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="brand">
+        <div class="nasa-badge">NASA ARCHIVE</div>
+        <div>
+          <h1 class="title">EARTH JUKEBOX: SONIFICATION DECK</h1>
+          <p class="subtitle" id="sourceSubtitle">Loading official NASA satellite telemetry...</p>
+        </div>
+      </div>
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn" id="voiceBtn" onclick="toggleVoice()">🔊 Voice Synth: OFF</button>
+        <button class="btn" onclick="toggleContrast()">⚡ High-Contrast</button>
+      </div>
+    </div>
+
+    <!-- Jukebox Track Buttons -->
+    <div class="jukebox-slots">
+      <button class="slot-btn active" id="tab-rain" onclick="loadDataset('rain')">
+        <span class="slot-tag">TRACK 01 • GPM & POWER SATELLITE</span>
+        <span class="slot-name">🌧️ Atmospheric Rain & Heat</span>
+        <span class="slot-sub">1985–2025 • Crystal Pluck + Storm Harmonics</span>
+      </button>
+      <button class="slot-btn" id="tab-ocean" onclick="loadDataset('ocean')">
+        <span class="slot-tag">TRACK 02 • MODIS AQUA & JASON-3</span>
+        <span class="slot-name">🌊 Indian Ocean Thermal Swell</span>
+        <span class="slot-sub">1993–2025 • Deep Wave Pad + FM Vibrato</span>
+      </button>
+      <button class="slot-btn" id="tab-glacier" onclick="loadDataset('glacier')">
+        <span class="slot-tag">TRACK 03 • GRACE & GRACE-FO</span>
+        <span class="slot-name">🧊 Polar Ice Mass Loss (Gt)</span>
+        <span class="slot-sub">2002–2025 • Cryo Sub-Bass + Siren Overdrive</span>
+      </button>
+    </div>
+
+    <!-- Main Stage: Jukebox Turntable + NASA Historical Graph -->
+    <div class="main-stage">
+      <div class="card vinyl-box">
+        <div style="font-size: 12px; font-weight: 700; color: #94a3b8; letter-spacing: 1px;">SONIFICATION TURNTABLE</div>
+        <div class="vinyl-disc" id="vinylDisc">
+          <div class="vinyl-center" id="vinylYear">1985</div>
+        </div>
+        <div class="eq-bars" id="eqContainer"></div>
+        <div style="font-size: 12px; color: #cbd5e1;" id="synthModeText">
+          Low Change = Soft Low Pitch | High Change = High Pitch Alert
+        </div>
+      </div>
+
+      <div class="card" style="display: flex; flex-direction: column; justify-content: space-between; gap: 12px;">
+        <canvas id="dataChart" height="135"></canvas>
+        <div class="telemetry-grid">
+          <div class="stat-box">
+            <div class="stat-label" id="labelPrimary">Primary Metric</div>
+            <div class="stat-val" id="valPrimary">--</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label" id="labelSecondary">Secondary Metric</div>
+            <div class="stat-val" id="valSecondary">--</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Sound Pitch / Vol</div>
+            <div class="stat-val" id="valFreq">220 Hz</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Change (Delta Jump)</div>
+            <div class="stat-val" id="valDelta">Baseline</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Readout & Anomaly Detector -->
+    <div class="readout-banner" id="readoutBanner" aria-live="polite">
+      <div>
+        <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--theme); letter-spacing: 1px;">
+          NASA Historical Telemetry & Sound Mapping
+        </div>
+        <div id="explanationText" style="font-size: 17px; font-weight: 600; margin-top: 4px;">
+          Select Play to hear historical shifts...
+        </div>
+      </div>
+      <div class="anomaly-badge" id="anomalyBadge">STABLE BASELINE</div>
+    </div>
+
+    <!-- Player Controls -->
+    <div class="card">
+      <div class="controls-row">
+        <div style="display: flex; gap: 10px;">
+          <button class="btn primary" id="playBtn" onclick="togglePlay()">▶ Play Jukebox Track</button>
+          <button class="btn" onclick="stopAudio()">■ Reset</button>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <span style="font-size: 13px; color: #94a3b8;">Tempo:</span>
+          <button class="btn" id="speed-0.5" onclick="setSpeed(0.5)">0.5x</button>
+          <button class="btn active-opt" id="speed-1" onclick="setSpeed(1)">1x</button>
+          <button class="btn" id="speed-2" onclick="setSpeed(2)">2x</button>
+        </div>
+        <div id="stepCounter" style="font-family: monospace; font-size: 14px; color: var(--theme); font-weight: bold;">
+          Year 1 / 1
+        </div>
+      </div>
+      <input type="range" id="scrubber" min="0" max="6" value="0" oninput="scrubTo(this.value)" />
+    </div>
+  </div>
+
+  <script>
+    const BACKEND_URL = 'http://localhost:5000/data';
+
+    // Embedded fallback copy so your demo STILL WORKS even if localhost:5000 is accidentally closed!
+    const FALLBACK_DATA = {
+      rain: {
+        datasetId: "rain", title: "Atmospheric Temp & Monsoon Extremes (1985–2025)",
+        source: "NASA POWER (MERRA-2) & GPM IMERG Satellite Archive",
+        unitPrimary: "°C (Peak Avg)", unitSecondary: "mm (Max Daily Burst)",
+        records: [
+          { index: 0, date: "1985", raw: { primary: 27.1, secondary: 42.0 }, norm: { pitch: 0.15, intensity: 0.20 }, explanation: "1985 Baseline: Stable 27.1°C temperature with moderate 42mm monsoon rain." },
+          { index: 1, date: "1990", raw: { primary: 27.4, secondary: 51.5 }, norm: { pitch: 0.25, intensity: 0.28 }, explanation: "1990: Slight warming (+0.3°C). Pitch rises gently with light rain harmonics." },
+          { index: 2, date: "1995", raw: { primary: 27.9, secondary: 68.0 }, norm: { pitch: 0.38, intensity: 0.42 }, explanation: "1995: Noticeable thermal shift to 27.9°C; heavier 68mm cloudbursts trigger brighter chime." },
+          { index: 3, date: "2000", raw: { primary: 28.2, secondary: 59.0 }, norm: { pitch: 0.48, intensity: 0.35 }, explanation: "2000: Millennial baseline reaches 28.2°C; mid-frequency synth tone stabilizes." },
+          { index: 4, date: "2005", raw: { primary: 28.8, secondary: 94.5 }, norm: { pitch: 0.62, intensity: 0.65 }, explanation: "2005 Spike: Sharp jump to 94.5mm extreme rain! High-pitch raindrop arpeggio activates." },
+          { index: 5, date: "2010", raw: { primary: 29.3, secondary: 112.0 }, norm: { pitch: 0.74, intensity: 0.78 }, explanation: "2010 El Niño Effect: 29.3°C heat pushes pitch higher with louder storm resonance." },
+          { index: 6, date: "2015", raw: { primary: 29.8, secondary: 128.4 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2015 Record Heat: Near 30°C threshold. High-frequency alert harmonics engage." },
+          { index: 7, date: "2020", raw: { primary: 30.2, secondary: 145.0 }, norm: { pitch: 0.92, intensity: 0.94 }, explanation: "2020 Extreme Event: 145mm flash rain burst creates rapid high-pitch acoustic shimmer." },
+          { index: 8, date: "2025", raw: { primary: 30.8, secondary: 162.5 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Peak Anomaly: +3.7°C above 1985 baseline. Maximum pitch & full harmonic intensity." }
+        ]
+      },
+      ocean: {
+        datasetId: "ocean", title: "Indian Ocean Thermal Expansion & Swell (1993–2025)",
+        source: "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason Altimetry",
+        unitPrimary: "°C (Sea Surface)", unitSecondary: "mm (Sea Level Rise)",
+        records: [
+          { index: 0, date: "1993", raw: { primary: 26.8, secondary: 0.0 }, norm: { pitch: 0.12, intensity: 0.15 }, explanation: "1993 TOPEX Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
+          { index: 1, date: "1997", raw: { primary: 27.3, secondary: 14.2 }, norm: { pitch: 0.28, intensity: 0.30 }, explanation: "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
+          { index: 2, date: "2001", raw: { primary: 27.5, secondary: 26.8 }, norm: { pitch: 0.36, intensity: 0.38 }, explanation: "2001: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
+          { index: 3, date: "2005", raw: { primary: 27.9, secondary: 41.0 }, norm: { pitch: 0.50, intensity: 0.50 }, explanation: "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
+          { index: 4, date: "2010", raw: { primary: 28.4, secondary: 58.5 }, norm: { pitch: 0.66, intensity: 0.65 }, explanation: "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
+          { index: 5, date: "2016", raw: { primary: 29.1, secondary: 79.2 }, norm: { pitch: 0.84, intensity: 0.82 }, explanation: "2016 Coral Bleaching Peak: +0.7°C sudden jump! Sharp pitch rise and heavy vibrato." },
+          { index: 6, date: "2020", raw: { primary: 29.4, secondary: 94.0 }, norm: { pitch: 0.92, intensity: 0.90 }, explanation: "2020: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
+          { index: 7, date: "2025", raw: { primary: 29.9, secondary: 111.5 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Critical Thermal High: 29.9°C & +111.5mm rise. Peak frequency & maximum wave pulse." }
+        ]
+      },
+      glacier: {
+        datasetId: "glacier", title: "Antarctica & Greenland Polar Ice Mass Loss (2002–2025)",
+        source: "NASA GRACE & GRACE-FO Satellite Gravimetry Mission",
+        unitPrimary: "Gigatonnes (Gt Ice Mass)", unitSecondary: "Gt/yr (Melt Acceleration)",
+        records: [
+          { index: 0, date: "2002", raw: { primary: 0, secondary: 85 }, norm: { pitch: 0.15, intensity: 0.15 }, explanation: "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
+          { index: 1, date: "2005", raw: { primary: -410, secondary: 115 }, norm: { pitch: 0.28, intensity: 0.28 }, explanation: "2005 (-410 Gt lost): Initial ice shelf thinning raises tension pitch slightly." },
+          { index: 2, date: "2008", raw: { primary: -890, secondary: 148 }, norm: { pitch: 0.42, intensity: 0.42 }, explanation: "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
+          { index: 3, date: "2012", raw: { primary: -1540, secondary: 195 }, norm: { pitch: 0.60, intensity: 0.62 }, explanation: "2012 Extreme Melt Year (-1,540 Gt): Sharp 650 Gt drop triggers high-delta alarm harmonic!" },
+          { index: 4, date: "2016", raw: { primary: -2110, secondary: 215 }, norm: { pitch: 0.74, intensity: 0.75 }, explanation: "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
+          { index: 5, date: "2020", raw: { primary: -2680, secondary: 255 }, norm: { pitch: 0.88, intensity: 0.88 }, explanation: "2020 GRACE-FO Record (-2,680 Gt): Rapid West Antarctic grounding line retreat." },
+          { index: 6, date: "2025", raw: { primary: -3290, secondary: 290 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Cumulative Loss (-3,290 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
+        ]
+      }
+    };
+
+    let currentDataset = null;
+    let activeTab = 'rain';
+    let currentIndex = 0;
+    let isPlaying = false;
+    let voiceEnabled = false;
+    let speed = 1;
+    let timer = null;
+    let chartInstance = null;
+    let audioCtx = null;
+
+    // Create 16 Equalizer Bars
+    const eqContainer = document.getElementById('eqContainer');
+    for (let i = 0; i < 16; i++) {
+      const bar = document.createElement('div');
+      bar.className = 'eq-bar';
+      eqContainer.appendChild(bar);
+    }
+
+    // Theme Colors per Track
+    function applyTheme(name) {
+      const root = document.documentElement;
+      if (name === 'rain') {
+        root.style.setProperty('--theme', '#00f2fe');
+        root.style.setProperty('--theme-glow', 'rgba(0, 242, 254, 0.35)');
+      } else if (name === 'ocean') {
+        root.style.setProperty('--theme', '#38bdf8');
+        root.style.setProperty('--theme-glow', 'rgba(56, 189, 248, 0.35)');
+      } else {
+        root.style.setProperty('--theme', '#c084fc');
+        root.style.setProperty('--theme-glow', 'rgba(192, 132, 252, 0.4)');
+      }
+    }
+
+    // 1. Load Dataset from Backend (or fallback if server is off)
+    async function loadDataset(name) {
+      stopAudio();
+      activeTab = name;
+      applyTheme(name);
+
+      ['rain', 'ocean', 'glacier'].forEach(t => {
+        document.getElementById('tab-' + t).className = (t === name) ? 'slot-btn active' : 'slot-btn';
+      });
+
+      try {
+        const res = await fetch(`${BACKEND_URL}/${name}`);
+        if (!res.ok) throw new Error('Fallback');
+        currentDataset = await res.json();
+      } catch (e) {
+        currentDataset = FALLBACK_DATA[name];
+      }
+
+      currentIndex = 0;
+      document.getElementById('sourceSubtitle').innerText = `Source: ${currentDataset.source}`;
+      document.getElementById('labelPrimary').innerText = currentDataset.unitPrimary;
+      document.getElementById('labelSecondary').innerText = currentDataset.unitSecondary;
+      document.getElementById('scrubber').max = currentDataset.records.length - 1;
+      document.getElementById('scrubber').value = 0;
+
+      renderChart();
+      updateUI(0, 220, 0.2, false);
+    }
+
+    // 2. Render Historical Chart
+    function renderChart() {
+      const ctx = document.getElementById('dataChart').getContext('2d');
+      if (chartInstance) chartInstance.destroy();
+
+      const color = activeTab === 'rain' ? '#00f2fe' : activeTab === 'ocean' ? '#38bdf8' : '#c084fc';
+      chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: currentDataset.records.map(r => r.date),
+          datasets: [{
+            label: `${currentDataset.title}`,
+            data: currentDataset.records.map(r => r.raw.primary),
+            borderColor: color,
+            backgroundColor: 'rgba(56, 189, 248, 0.15)',
+            fill: true,
+            pointRadius: currentDataset.records.map((_, i) => i === currentIndex ? 10 : 5),
+            pointBackgroundColor: currentDataset.records.map((_, i) => i === currentIndex ? '#ffffff' : color),
+            borderWidth: 3,
+            tension: 0.35
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { labels: { color: '#f8fafc', font: { weight: 'bold' } } }
+          },
+          scales: {
+            x: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.08)' } },
+            y: { ticks: { color: '#cbd5e1' }, grid: { color: 'rgba(255,255,255,0.08)' } }
+          }
+        }
+      });
+    }
+
+    // 3. DYNAMIC CHANGE-DETECTION SOUND & VOICE ENGINE
+    function playChangeSound(index) {
+      const rec = currentDataset.records[index];
+      const prevRec = index > 0 ? currentDataset.records[index - 1] : rec;
+
+      // Calculate how big the change (jump) is from the previous year
+      const pitchNorm = rec.norm.pitch || 0.2;
+      const prevPitchNorm = prevRec.norm.pitch || 0.2;
+      const deltaJump = Math.abs(pitchNorm - prevPitchNorm);
+      const isBigChange = deltaJump >= 0.14 || pitchNorm >= 0.85;
+
+      // Low value/change = Low Pitch (190 Hz) & Soft Volume (0.15)
+      // High value/change = High Pitch (up to 780 Hz) & Loud Volume (0.55) + Extra Harmonic Effect!
+      const baseFreq = Math.round(190 + (pitchNorm * 520) + (deltaJump * 350));
+      const volumeLevel = Math.min(0.65, 0.15 + (pitchNorm * 0.35) + (deltaJump * 0.4));
+
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      const now = audioCtx.currentTime;
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+
+      // Track-specific synth wave
+      osc1.type = activeTab === 'rain' ? 'triangle' : activeTab === 'ocean' ? 'sine' : 'sawtooth';
+      osc1.frequency.setValueAtTime(baseFreq, now);
+
+      // Pitch slide up when a change occurs
+      if (isBigChange) {
+        osc1.frequency.exponentialRampToValueAtTime(baseFreq * 1.25, now + 0.35);
+      }
+
+      gain1.gain.setValueAtTime(volumeLevel, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
+
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.75);
+
+      // EXTRA HIGH-PITCH HARMONIC EFFECT WHEN BIG CHANGE OCCURS
+      if (isBigChange) {
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(baseFreq * 1.5, now + 0.08); // High 5th harmonic chime
+        gain2.gain.setValueAtTime(volumeLevel * 0.6, now + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.65);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(now + 0.08);
+        osc2.stop(now + 0.65);
+      }
+
+      // Optional High-Pitch / Low-Pitch Voice Synthesizer
+      if (voiceEnabled && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utter = new SpeechSynthesisUtterance(`${rec.date}: ${rec.raw.primary}`);
+        // Voice pitch automatically shifts from low (0.7) to high (1.6) with the data!
+        utter.pitch = 0.7 + (pitchNorm * 0.9);
+        utter.rate = 1.15;
+        window.speechSynthesis.speak(utter);
+      }
+
+      animateEqualizer(pitchNorm, isBigChange);
+      updateUI(deltaJump, baseFreq, volumeLevel, isBigChange);
+    }
+
+    function animateEqualizer(intensity, isBigChange) {
+      const bars = document.querySelectorAll('.eq-bar');
+      bars.forEach((bar) => {
+        const randomBoost = Math.random() * 40;
+        const height = Math.min(100, Math.round((intensity * 65) + randomBoost));
+        bar.style.height = `${height}%`;
+        bar.style.backgroundColor = isBigChange ? '#ef4444' : 'var(--theme)';
+      });
+    }
+
+    function updateUI(deltaJump, freq, vol, isBigChange) {
+      const rec = currentDataset.records[currentIndex];
+      const prevRec = currentIndex > 0 ? currentDataset.records[currentIndex - 1] : rec;
+      const rawDiff = (rec.raw.primary - prevRec.raw.primary).toFixed(1);
+
+      document.getElementById('vinylYear').innerText = rec.date;
+      document.getElementById('valPrimary').innerText = rec.raw.primary;
+      document.getElementById('valSecondary').innerText = rec.raw.secondary;
+      document.getElementById('valFreq').innerText = `${freq} Hz (${Math.round(vol * 100)}% Vol)`;
+      document.getElementById('valDelta').innerText = currentIndex === 0 ? 'Baseline' : `${rawDiff > 0 ? '+' : ''}${rawDiff}`;
+      document.getElementById('explanationText').innerText = rec.explanation;
+      document.getElementById('stepCounter').innerText = `Year ${rec.date} (${currentIndex + 1}/${currentDataset.records.length})`;
+      document.getElementById('scrubber').value = currentIndex;
+
+      const banner = document.getElementById('readoutBanner');
+      const badge = document.getElementById('anomalyBadge');
+      if (isBigChange) {
+        banner.classList.add('spike-pulse');
+        badge.className = 'anomaly-badge high';
+        badge.innerText = '⚠️ HIGH PITCH ANOMALY JUMP!';
+      } else {
+        banner.classList.remove('spike-pulse');
+        badge.className = 'anomaly-badge';
+        badge.innerText = 'LOW PITCH / GRADUAL SHIFT';
+      }
+
+      if (chartInstance) {
+        const color = activeTab === 'rain' ? '#00f2fe' : activeTab === 'ocean' ? '#38bdf8' : '#c084fc';
+        chartInstance.data.datasets[0].pointRadius = currentDataset.records.map((_, i) => i === currentIndex ? 11 : 5);
+        chartInstance.data.datasets[0].pointBackgroundColor = currentDataset.records.map((_, i) =>
+          i === currentIndex ? (isBigChange ? '#ef4444' : '#ffffff') : color
+        );
+        chartInstance.update();
+      }
+    }
+
+    function togglePlay() {
+      const disc = document.getElementById('vinylDisc');
+      if (isPlaying) {
+        clearInterval(timer);
+        isPlaying = false;
+        disc.classList.remove('spinning');
+        document.getElementById('playBtn').innerText = '▶ Play Jukebox Track';
+      } else {
+        isPlaying = true;
+        disc.classList.add('spinning');
+        document.getElementById('playBtn').innerText = '⏸ Pause Jukebox';
+        runStep();
+        timer = setInterval(runStep, 1600 / speed);
+      }
+    }
+
+    function runStep() {
+      playChangeSound(currentIndex);
+      currentIndex = (currentIndex + 1) % currentDataset.records.length;
+    }
+
+    function stopAudio() {
+      clearInterval(timer);
+      isPlaying = false;
+      currentIndex = 0;
+      document.getElementById('vinylDisc').classList.remove('spinning');
+      document.getElementById('playBtn').innerText = '▶ Play Jukebox Track';
+      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+      if (currentDataset) updateUI(0, 190, 0.15, false);
+    }
+
+    function scrubTo(val) {
+      currentIndex = Number(val);
+      playChangeSound(currentIndex);
+    }
+
+    function setSpeed(s) {
+      speed = s;
+      [0.5, 1, 2].forEach(v => {
+        document.getElementById('speed-' + v).className = (v === s) ? 'btn active-opt' : 'btn';
+      });
+      if (isPlaying) {
+        clearInterval(timer);
+        timer = setInterval(runStep, 1600 / speed);
+      }
+    }
+
+    function toggleVoice() {
+      voiceEnabled = !voiceEnabled;
+      const btn = document.getElementById('voiceBtn');
+      btn.innerText = voiceEnabled ? '🔊 Voice Synth: ON' : '🔊 Voice Synth: OFF';
+      btn.className = voiceEnabled ? 'btn active-opt' : 'btn';
+    }
+
+    function toggleContrast() {
+      document.body.classList.toggle('high-contrast');
+    }
+
+    loadDataset('rain');
+  </script>
+</body>
+</html>

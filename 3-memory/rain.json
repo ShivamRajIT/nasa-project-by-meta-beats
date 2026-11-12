@@ -1,0 +1,18 @@
+{
+  "datasetId": "rain",
+  "title": "Atmospheric Temp & Monsoon Extremes (1985–2025)",
+  "source": "NASA POWER (MERRA-2) & GPM IMERG Satellite Archive",
+  "unitPrimary": "°C (Peak Avg)",
+  "unitSecondary": "mm (Max Daily Burst)",
+  "records": [
+    { "index": 0, "date": "1985", "raw": { "primary": 27.1, "secondary": 42.0 }, "norm": { "pitch": 0.15, "intensity": 0.20 }, "explanation": "1985 Baseline: Stable 27.1°C temperature with moderate 42mm monsoon rain." },
+    { "index": 1, "date": "1990", "raw": { "primary": 27.4, "secondary": 51.5 }, "norm": { "pitch": 0.25, "intensity": 0.28 }, "explanation": "1990: Slight warming (+0.3°C). Pitch rises gently with light rain harmonics." },
+    { "index": 2, "date": "1995", "raw": { "primary": 27.9, "secondary": 68.0 }, "norm": { "pitch": 0.38, "intensity": 0.42 }, "explanation": "1995: Noticeable thermal shift to 27.9°C; heavier 68mm cloudbursts trigger brighter chime." },
+    { "index": 3, "date": "2000", "raw": { "primary": 28.2, "secondary": 59.0 }, "norm": { "pitch": 0.48, "intensity": 0.35 }, "explanation": "2000: Millennial baseline reaches 28.2°C; mid-frequency synth tone stabilizes." },
+    { "index": 4, "date": "2005", "raw": { "primary": 28.8, "secondary": 94.5 }, "norm": { "pitch": 0.62, "intensity": 0.65 }, "explanation": "2005 Spike: Sharp jump to 94.5mm extreme rain! High-pitch raindrop arpeggio activates." },
+    { "index": 5, "date": "2010", "raw": { "primary": 29.3, "secondary": 112.0 }, "norm": { "pitch": 0.74, "intensity": 0.78 }, "explanation": "2010 El Niño Effect: 29.3°C heat pushes pitch higher with louder storm resonance." },
+    { "index": 6, "date": "2015", "raw": { "primary": 29.8, "secondary": 128.4 }, "norm": { "pitch": 0.85, "intensity": 0.86 }, "explanation": "2015 Record Heat: Near 30°C threshold. High-frequency alert harmonics engage." },
+    { "index": 7, "date": "2020", "raw": { "primary": 30.2, "secondary": 145.0 }, "norm": { "pitch": 0.92, "intensity": 0.94 }, "explanation": "2020 Extreme Event: 145mm flash rain burst creates rapid high-pitch acoustic shimmer." },
+    { "index": 8, "date": "2025", "raw": { "primary": 30.8, "secondary": 162.5 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Peak Anomaly: +3.7°C above 1985 baseline. Maximum pitch & full harmonic intensity." }
+  ]
+}

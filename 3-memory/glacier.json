@@ -1,0 +1,16 @@
+{
+  "datasetId": "glacier",
+  "title": "Antarctica & Greenland Polar Ice Mass Loss (2002–2025)",
+  "source": "NASA GRACE & GRACE-FO Satellite Gravimetry Mission",
+  "unitPrimary": "Gigatonnes (Gt Ice Mass)",
+  "unitSecondary": "Gt/yr (Melt Acceleration)",
+  "records": [
+    { "index": 0, "date": "2002", "raw": { "primary": 0, "secondary": 85 }, "norm": { "pitch": 0.15, "intensity": 0.15 }, "explanation": "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
+    { "index": 1, "date": "2005", "raw": { "primary": -410, "secondary": 115 }, "norm": { "pitch": 0.28, "intensity": 0.28 }, "explanation": "2005 (-410 Gt lost): Initial ice shelf thinning raises tension pitch slightly." },
+    { "index": 2, "date": "2008", "raw": { "primary": -890, "secondary": 148 }, "norm": { "pitch": 0.42, "intensity": 0.42 }, "explanation": "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
+    { "index": 3, "date": "2012", "raw": { "primary": -1540, "secondary": 195 }, "norm": { "pitch": 0.60, "intensity": 0.62 }, "explanation": "2012 Extreme Melt Year (-1,540 Gt): Sharp 650 Gt drop triggers high-delta alarm harmonic!" },
+    { "index": 4, "date": "2016", "raw": { "primary": -2110, "secondary": 215 }, "norm": { "pitch": 0.74, "intensity": 0.75 }, "explanation": "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
+    { "index": 5, "date": "2020", "raw": { "primary": -2680, "secondary": 255 }, "norm": { "pitch": 0.88, "intensity": 0.88 }, "explanation": "2020 GRACE-FO Record (-2,680 Gt): Rapid West Antarctic grounding line retreat." },
+    { "index": 6, "date": "2025", "raw": { "primary": -3290, "secondary": 290 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Cumulative Loss (-3,290 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
+  ]
+}
