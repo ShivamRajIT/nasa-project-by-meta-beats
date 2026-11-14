@@ -3,295 +3,406 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NASA EARTH JUKEBOX PRO — 3D WebGL Telemetry & Multi-Synth Studio</title>
+  <title>META BEATS // NASA EARTH JUKEBOX 3D — Planetary Sonification Studio</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body data-track="rain">
 
-  <div class="cyber-grid-bg"></div>
-  <div class="radial-vignette"></div>
-  <div class="scanlines"></div>
-
-  <div class="app-shell">
-    <div class="top-ticker">
-      <div>
-        <span class="status-dot"></span>
-        <strong>ARCHITECTURE:</strong> 1-FRONTEND (UI/CSS) ➔ 2-BACKEND (API) ➔ 3-MEMORY (15-EPOCH NASA JSON)
-      </div>
-      <div id="liveClockDisplay">UTC TELEMETRY CLOCK: SYNCHRONIZING...</div>
-      <div>DSP ENGINE: <strong>5-CHANNEL WEB AUDIO SYNTH + LOW-LATENCY WEBGL</strong></div>
+  <!-- 1. QUANTUM BOOT LOADER OVERLAY -->
+  <div class="boot-screen" id="bootScreen">
+    <div class="boot-rings">
+      <div class="boot-ring r1"></div>
+      <div class="boot-ring r2"></div>
+      <div class="boot-ring r3"></div>
+      <div class="boot-core-logo">META<br/>BEATS</div>
     </div>
+    <div class="boot-title">TEAM META BEATS // NASA SONIC LAB</div>
+    <div class="boot-progress-track">
+      <div class="boot-progress-bar"></div>
+    </div>
+    <div class="boot-status-log" id="bootStatusText">INITIALIZING 20-EPOCH SATELLITE TELEMETRY & 5-CHANNEL WEBGL SYNTH...</div>
+  </div>
 
-    <header class="hud-header">
-      <div class="brand-cluster">
-        <div class="nasa-emblem">
-          NASA
-          <span>SONIC</span>
+  <!-- 2. ANIMATED AURORA & CYBER HORIZON BACKGROUNDS -->
+  <div class="quantum-bg-stack">
+    <div class="aurora-blob b1"></div>
+    <div class="aurora-blob b2"></div>
+    <div class="aurora-blob b3"></div>
+  </div>
+  <div class="perspective-cyber-floor"></div>
+  <div class="scanline-overlay"></div>
+
+  <!-- 3. TOP ORBITAL TELEMETRY RIBBON -->
+  <div class="orbital-top-bar">
+    <div style="display: flex; align-items: center; gap: 12px;">
+      <span class="meta-beats-pill"><span class="live-pulse-led"></span> TEAM: META BEATS</span>
+      <span><strong>PIPELINE:</strong> 1-FRONTEND ➔ 2-BACKEND ➔ 3-MEMORY (20-EPOCH ARCHIVE)</span>
+    </div>
+    <div class="top-telemetry-cluster">
+      <div class="telemetry-kv"><span>SATELLITE:</span><strong id="topSatName">GPM / TERRA MERRA-2</strong></div>
+      <div class="telemetry-kv"><span>ARCHIVE STATUS:</span><strong id="topArchiveSync">3-MEMORY ONLINE</strong></div>
+      <div class="telemetry-kv" id="liveClockDisplay">UTC: SYNCHRONIZING...</div>
+    </div>
+  </div>
+
+  <!-- 4. MASTER WORKSTATION SHELL -->
+  <div class="workstation-shell">
+
+    <!-- HERO COMMAND HEADER -->
+    <header class="meta-hero-header">
+      <div class="hero-brand-left">
+        <div class="reactor-emblem">
+          <div class="reactor-ring-outer"></div>
+          <div class="reactor-ring-inner"></div>
+          <div class="reactor-core-text">META<small>BEATS</small></div>
         </div>
-        <div class="title-block">
-          <h1>EARTH JUKEBOX 3D: PLANETARY SONIFICATION STUDIO</h1>
-          <p id="missionSourceText">MISSION ARCHIVE: GPM IMERG / POWER MERRA-2 / MODIS AQUA / GRACE-FO</p>
+        <div class="hero-title-group">
+          <div class="team-eyebrow">⚡ NASA SPACE APPS HACKATHON // BUILT BY TEAM META BEATS</div>
+          <h1 class="hero-main-title">EARTH JUKEBOX <span class="gradient-span">QUANTUM SONIFICATION</span></h1>
+          <p class="hero-sub-source" id="missionSourceText">MISSION ARCHIVE: GPM IMERG / POWER MERRA-2 / MODIS AQUA / GRACE-FO</p>
         </div>
       </div>
 
-      <div class="header-actions">
-        <button class="cyber-btn" id="voiceBtn" onclick="toggleVoiceSynth()">🔊 AI Voice: OFF</button>
-        <button class="cyber-btn active" id="ambienceBtn" onclick="toggleAmbience()">🌧️ Ambience: ON</button>
-        <button class="cyber-btn" onclick="toggleScanlines()">📺 Scanlines</button>
-        <button class="cyber-btn" onclick="toggleHighContrast()">⚡ High-Contrast</button>
+      <div class="hero-controls-right">
+        <!-- 4-View Mode Switcher -->
+        <div class="nav-mode-tabs">
+          <button class="mode-tab-btn active" onclick="switchStudioView('cockpit', this)">🎛️ ORBITAL STUDIO</button>
+          <button class="mode-tab-btn" onclick="switchStudioView('sequencer', this)">🎹 16-STEP SEQUENCER</button>
+          <button class="mode-tab-btn" onclick="switchStudioView('team', this)">🚀 TEAM META BEATS</button>
+        </div>
+
+        <button class="holo-btn" id="voiceBtn" onclick="toggleVoiceSynth()">🔊 AI Voice: OFF</button>
+        <button class="holo-btn active" id="ambienceBtn" onclick="toggleAmbience()">🌧️ Ambience: ON</button>
+        <button class="holo-btn" onclick="exportActiveTelemetryJSON()">📥 Export JSON</button>
+        <button class="holo-btn" onclick="toggleHighContrast()">⚡ Contrast</button>
       </div>
     </header>
 
-    <!-- Live Satellite Telemetry Ribbon -->
-    <div class="telemetry-ribbon">
-      <div class="ribbon-chip"><span>ACTIVE SATELLITE</span><strong id="ribbonSat">GPM / TERRA</strong></div>
-      <div class="ribbon-chip"><span>DATA RESOLUTION</span><strong id="ribbonRes">15 HISTORICAL EPOCHS</strong></div>
-      <div class="ribbon-chip"><span>ARCHIVE SOURCE</span><strong id="ribbonArchive">3-MEMORY SYNCED</strong></div>
-      <div class="ribbon-chip"><span>RENDER PIPELINE</span><strong>60FPS GPU WEBGL</strong></div>
+    <!-- 3-DISC HOLOGRAPHIC SELECTOR DECK -->
+    <section class="disc-selector-deck">
+      <div class="holo-disc-card active" id="card-rain" onclick="switchTrack('rain')">
+        <div class="disc-meta">
+          <span class="disc-mission-tag">DISC 01 • GPM IMERG & POWER MERRA-2</span>
+          <div class="disc-name">Atmospheric Rain & Monsoon Extremes</div>
+          <div class="disc-specs">1980–2025 (20 Epochs) • Crystal Pluck Arpeggio + Monsoon Static</div>
+        </div>
+        <div class="disc-visualizer-orb">
+          🌧️
+          <div class="mini-eq-bars"><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+
+      <div class="holo-disc-card" id="card-ocean" onclick="switchTrack('ocean')">
+        <div class="disc-meta">
+          <span class="disc-mission-tag">DISC 02 • MODIS AQUA & SENTINEL-6</span>
+          <div class="disc-name">Indian Ocean Thermal Swell & Rise</div>
+          <div class="disc-specs">1993–2025 (20 Epochs) • Deep FM Pad Chord + Surf Filter Sweep</div>
+        </div>
+        <div class="disc-visualizer-orb">
+          🌊
+          <div class="mini-eq-bars"><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+
+      <div class="holo-disc-card" id="card-glacier" onclick="switchTrack('glacier')">
+        <div class="disc-meta">
+          <span class="disc-mission-tag">DISC 03 • GRACE-FO & ICESAT-2 LASER</span>
+          <div class="disc-name">Antarctic & Polar Cryo Mass Loss</div>
+          <div class="disc-specs">2002–2025 (20 Epochs) • Sub-Bass Cryo Drone + Glacier Fracture</div>
+        </div>
+        <div class="disc-visualizer-orb">
+          🧊
+          <div class="mini-eq-bars"><span></span><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================================
+         VIEW 1: MAIN ORBITAL COCKPIT STUDIO
+         ==================================================================== -->
+    <div class="studio-view-section active-view" id="view-cockpit">
+      <section class="quantum-cockpit-grid">
+
+        <!-- LEFT COLUMN: 3D GLOBE + HOLO TURNTABLE + DUAL ANALYZER -->
+        <div class="hud-module">
+          <div class="module-header">
+            <div class="module-title">🌐 3D Orbital Telemetry Globe</div>
+            <span class="module-badge">DRAG TO ROTATE</span>
+          </div>
+
+          <div class="planetary-stage" id="globeViewport">
+            <div class="radar-reticle-svg"></div>
+            <div id="threeCanvasContainer"></div>
+            <div class="globe-telemetry-hud">
+              <div class="globe-hud-row">
+                <span id="orbitCoords">LAT: 12.97° N | LON: 77.59° E</span>
+                <span id="orbitStatus">ORBIT: NOMINAL</span>
+              </div>
+              <div class="globe-hud-row" style="align-items: flex-end;">
+                <div>
+                  <div style="font-size: 9px; color: #94a3b8;">EPOCH YEAR</div>
+                  <div class="epoch-holo-box" id="globeYearBadge">1980</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 9px; color: #94a3b8;">HARMONIC PITCH</div>
+                  <div id="globeFreqBadge" style="font-family: var(--font-display); font-size: 14px; font-weight: 900; color: var(--theme);">131 Hz (C3)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="holo-turntable-deck">
+            <div class="vinyl-platter" id="vinylDisc">
+              <div class="vinyl-label-center" id="vinylCoreText">1980</div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+              <div style="font-family: var(--font-display); font-size: 13px; font-weight: 900; color: #fff;" id="turntableTrackName">
+                META BEATS // DISC 01: MONSOON
+              </div>
+              <div style="font-family: var(--font-mono); font-size: 11px; color: var(--theme);">
+                Tuning: 15-Note Pentatonic + Anomaly Boost
+              </div>
+              <div style="font-size: 11px; color: var(--text-secondary);">
+                Climate jump ➔ Auto harmonic pitch & sub-drop
+              </div>
+            </div>
+          </div>
+
+          <div class="analyzer-stage">
+            <canvas id="audioScopeCanvas" width="350" height="92"></canvas>
+            <div class="analyzer-footer">
+              <span>60FPS FFT SPECTRUM + OSCILLOSCOPE</span>
+              <span id="dbMeterText">-48.0 dB PEAK</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- CENTER COLUMN: 20-EPOCH CHART + 4 KPI CARDS + 15-KEY SYNTH PIANO + ANOMALY BANNER -->
+        <div class="hud-module">
+          <div class="module-header">
+            <div class="module-title">📈 20-Epoch NASA Satellite Time-Series</div>
+            <span class="module-badge">CLICK POINT TO AUDITION</span>
+          </div>
+
+          <div class="chart-stage-container">
+            <canvas id="mainTelemetryChart"></canvas>
+          </div>
+
+          <div class="telemetry-kpi-grid">
+            <div class="kpi-holo-card">
+              <span class="kpi-label" id="kpiLabelPrimary">PRIMARY METRIC</span>
+              <span class="kpi-value" id="kpiValPrimary">--</span>
+              <span class="kpi-subtext">Satellite Sensor</span>
+            </div>
+            <div class="kpi-holo-card">
+              <span class="kpi-label" id="kpiLabelSecondary">SECONDARY METRIC</span>
+              <span class="kpi-value" id="kpiValSecondary">--</span>
+              <span class="kpi-subtext">Intensity Index</span>
+            </div>
+            <div class="kpi-holo-card">
+              <span class="kpi-label">SYNTH FREQUENCY</span>
+              <span class="kpi-value" id="kpiValFreq">220 Hz</span>
+              <span class="kpi-subtext" id="kpiSubNote">Musical Note: A3</span>
+            </div>
+            <div class="kpi-holo-card">
+              <span class="kpi-label">EPOCH DELTA SHIFT</span>
+              <span class="kpi-value" id="kpiValDelta">0.0</span>
+              <span class="kpi-subtext">Anomaly Vector</span>
+            </div>
+          </div>
+
+          <!-- Interactive 15-Key Harmonic Synth Keyboard -->
+          <div class="harmonic-keyboard-strip">
+            <div class="keyboard-header">
+              <span>🎹 LIVE INTERACTIVE HARMONIC KEYBOARD (CLICK ANY KEY TO AUDITION FREQUENCY)</span>
+              <span id="activeScaleReadout">SCALE: C-PENTATONIC EXTENDED</span>
+            </div>
+            <div class="piano-keys-row" id="pianoKeysContainer"></div>
+          </div>
+
+          <!-- Live Anomaly Readout Console -->
+          <div class="anomaly-hud-banner" id="anomalyConsole">
+            <div class="banner-copy">
+              <div class="banner-eyebrow">META BEATS SONIFICATION ENGINE (TELEMETRY ➔ ACOUSTICS)</div>
+              <div class="banner-headline" id="explanationBannerText">
+                Click "▶ LAUNCH MASTER SONIFICATION" below to stream all 20 NASA satellite epochs.
+              </div>
+            </div>
+            <div class="anomaly-badge-pill" id="anomalyStatusPill">TELEMETRY NOMINAL</div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN: 5-CHANNEL DSP MIXER + 8-PAD META BEATS SOUNDBOARD -->
+        <div class="hud-module cockpit-col-right">
+          <div class="module-header">
+            <div class="module-title">🎛️ 5-Channel DSP Synth Rack</div>
+            <span class="module-badge">META BEATS DSP</span>
+          </div>
+
+          <div class="dsp-mixer-rack">
+            <div class="dsp-channel-strip">
+              <div class="dsp-strip-top">
+                <span class="dsp-ch-label">🎹 CH1: Harmonic Lead Synth</span>
+                <button class="dsp-mute-btn" id="mute-lead" onclick="toggleChannelMute('lead')">ON</button>
+              </div>
+              <input type="range" class="holo-slider" id="vol-lead" min="0" max="100" value="82" />
+            </div>
+
+            <div class="dsp-channel-strip">
+              <div class="dsp-strip-top">
+                <span class="dsp-ch-label">🔊 CH2: Deep Sub-Bass Drone</span>
+                <button class="dsp-mute-btn" id="mute-bass" onclick="toggleChannelMute('bass')">ON</button>
+              </div>
+              <input type="range" class="holo-slider" id="vol-bass" min="0" max="100" value="72" />
+            </div>
+
+            <div class="dsp-channel-strip">
+              <div class="dsp-strip-top">
+                <span class="dsp-ch-label">🌪️ CH3: Procedural Weather FX</span>
+                <button class="dsp-mute-btn" id="mute-noise" onclick="toggleChannelMute('noise')">ON</button>
+              </div>
+              <input type="range" class="holo-slider" id="vol-noise" min="0" max="100" value="65" />
+            </div>
+
+            <div class="dsp-channel-strip">
+              <div class="dsp-strip-top">
+                <span class="dsp-ch-label">🥁 CH4: Rhythmic Pulse & Kick</span>
+                <button class="dsp-mute-btn" id="mute-perc" onclick="toggleChannelMute('perc')">ON</button>
+              </div>
+              <input type="range" class="holo-slider" id="vol-perc" min="0" max="100" value="75" />
+            </div>
+
+            <div class="dsp-channel-strip">
+              <div class="dsp-strip-top">
+                <span class="dsp-ch-label">🚨 CH5: Anomaly Siren & Echo</span>
+                <button class="dsp-mute-btn" id="mute-siren" onclick="toggleChannelMute('siren')">ON</button>
+              </div>
+              <input type="range" class="holo-slider" id="vol-siren" min="0" max="100" value="85" />
+            </div>
+          </div>
+
+          <div class="module-header" style="margin-top: 4px;">
+            <div class="module-title">⚡ META BEATS Live FX Pads</div>
+            <span class="module-badge">8-PAD TRIGGER</span>
+          </div>
+
+          <div class="soundboard-grid-8">
+            <button class="beat-pad-btn" onclick="triggerSoundPad('sonar', this)">📡 Satellite Ping</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('thunder', this)">⛈️ Monsoon Burst</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('subdrop', this)">💥 808 Sub-Drop</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('icecrack', this)">🧊 Glacier Fracture</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('geiger', this)">☢️ Solar Geiger</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('siren', this)">🚨 Anomaly Klaxon</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('swell', this)">🌊 Rogue Swell</button>
+            <button class="beat-pad-btn" onclick="triggerSoundPad('laser', this)">✨ Telemetry Sweep</button>
+          </div>
+        </div>
+
+      </section>
     </div>
 
-    <section class="track-selector-grid">
-      <div class="track-card active" id="card-rain" onclick="switchTrack('rain')">
-        <div class="track-info">
-          <span class="track-badge">DISC 01 • GPM & POWER SATELLITE</span>
-          <div class="track-title">Atmospheric Rain & Monsoon Heat</div>
-          <div class="track-desc">1980–2025 (15 Epochs) • Crystal Pluck + Monsoon Static</div>
+    <!-- ====================================================================
+         VIEW 2: 16-STEP TELEMETRY BEAT SEQUENCER
+         ==================================================================== -->
+    <div class="studio-view-section" id="view-sequencer">
+      <div class="hud-module">
+        <div class="module-header">
+          <div class="module-title">🎹 META BEATS 16-Step Planetary Drum & Telemetry Sequencer</div>
+          <span class="module-badge">CLICK CELLS TO TOGGLE RHYTHM</span>
         </div>
-        <div class="track-icon-orb">🌧️</div>
+        <p style="font-size: 12px; color: var(--text-secondary);">
+          Customize the rhythmic telemetry pattern triggered during master playback. Active steps fire alongside NASA satellite data points.
+        </p>
+        <div id="sequencerGridBox" style="display: flex; flex-direction: column; gap: 10px; margin-top: 6px;"></div>
       </div>
+    </div>
 
-      <div class="track-card" id="card-ocean" onclick="switchTrack('ocean')">
-        <div class="track-info">
-          <span class="track-badge">DISC 02 • MODIS AQUA & JASON-3</span>
-          <div class="track-title">Indian Ocean Thermal Swell</div>
-          <div class="track-desc">1993–2025 (15 Epochs) • Deep FM Pad + Surf Filter Sweep</div>
+    <!-- ====================================================================
+         VIEW 3: TEAM META BEATS MISSION ARCHITECTURE & CREW
+         ==================================================================== -->
+    <div class="studio-view-section" id="view-team">
+      <div class="hud-module">
+        <div class="module-header">
+          <div class="module-title">🚀 TEAM META BEATS — NASA SPACE APPS HACKATHON ARCHITECTURE</div>
+          <span class="module-badge">3-TIER STACK</span>
         </div>
-        <div class="track-icon-orb">🌊</div>
-      </div>
-
-      <div class="track-card" id="card-glacier" onclick="switchTrack('glacier')">
-        <div class="track-info">
-          <span class="track-badge">DISC 03 • GRACE-FO & ICESAT-2</span>
-          <div class="track-title">Antarctic & Polar Ice Mass Loss</div>
-          <div class="track-desc">2002–2025 (15 Epochs) • Sub-Bass Cryo Drone + Ice Fracture</div>
-        </div>
-        <div class="track-icon-orb">🧊</div>
-      </div>
-    </section>
-
-    <section class="cockpit-grid">
-      <div class="glass-panel">
-        <div class="panel-header">
-          <div class="panel-title">🌐 3D Orbital Telemetry Globe</div>
-          <span class="panel-tag">DRAG TO ROTATE</span>
-        </div>
-
-        <div class="globe-viewport" id="globeViewport">
-          <div id="threeCanvasContainer"></div>
-          <div class="globe-hud-overlay">
-            <div class="globe-hud-top">
-              <span id="orbitCoords">LAT: 12.97° N | LON: 77.59° E</span>
-              <span id="orbitStatus">ORBIT: NOMINAL</span>
-            </div>
-            <div class="globe-hud-bottom">
-              <div>
-                <div style="font-size: 9px; color: #94a3b8;">TIMELINE EPOCH</div>
-                <div class="hud-year-pill" id="globeYearBadge">1980</div>
-              </div>
-              <div style="text-align: right;">
-                <div style="font-size: 9px; color: #94a3b8;">ACOUSTIC PITCH</div>
-                <div id="globeFreqBadge" style="font-weight: 800; color: var(--theme);">220 Hz</div>
-              </div>
-            </div>
+        <div class="meta-team-grid">
+          <div class="meta-member-card">
+            <span class="member-role-tag">LEAD ARCHITECT & FULL-STACK DSP</span>
+            <div class="member-name">SHIVAM RAJ</div>
+            <div class="member-desc">Engineered the 3-tier `1-frontend`, `2-backend`, and `3-memory` pipeline, 5-channel Web Audio synthesizer, and Three.js orbital planet.</div>
           </div>
-        </div>
-
-        <div class="turntable-strip">
-          <div class="vinyl-3d" id="vinylDisc">
-            <div class="vinyl-core" id="vinylCoreText">LP</div>
+          <div class="meta-member-card">
+            <span class="member-role-tag">TIER 01 • FRONTEND ENGINE</span>
+            <div class="member-name">QUANTUM HUD UI</div>
+            <div class="member-desc">60FPS hardware-accelerated WebGL globe, real-time FFT spectrum analyzer, 15-key synth keyboard, and responsive sci-fi glassmorphism.</div>
           </div>
-          <div style="display: flex; flex-direction: column; gap: 3px;">
-            <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff;" id="turntableTrackName">
-              DISC 01: MONSOON EXTREMES
-            </div>
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--theme);">
-              Harmonic Scale: Pentatonic + Alert
-            </div>
-            <div style="font-size: 11px; color: var(--text-muted);">
-              Climate jump ➔ Auto harmonic pitch & sub-drop
-            </div>
+          <div class="meta-member-card">
+            <span class="member-role-tag">TIER 02 • BACKEND API</span>
+            <div class="member-name">NODE / EXPRESS CORE</div>
+            <div class="member-desc">Low-latency `/data/:track` REST endpoints serving normalized satellite time-series directly to the sonification engine.</div>
           </div>
-        </div>
-
-        <div class="scope-box">
-          <canvas id="audioScopeCanvas" width="340" height="85"></canvas>
-          <div class="scope-labels">
-            <span>LIVE FFT SPECTRUM + OSCILLOSCOPE</span>
-            <span id="dbMeterText">-48.0 dB PEAK</span>
+          <div class="meta-member-card">
+            <span class="member-role-tag">TIER 03 • MEMORY ARCHIVE</span>
+            <div class="member-name">20-EPOCH NASA JSON</div>
+            <div class="member-desc">High-resolution historical records from GPM IMERG, MERRA-2, MODIS Aqua, Jason-3, Sentinel-6, GRACE-FO, and ICESat-2.</div>
           </div>
         </div>
       </div>
+    </div>
 
-      <div class="glass-panel">
-        <div class="panel-header">
-          <div class="panel-title">📈 15-Epoch Satellite Time-Series</div>
-          <span class="panel-tag">CLICK GRAPH OR TABLE</span>
-        </div>
-
-        <div class="chart-wrapper">
-          <canvas id="mainTelemetryChart" height="145"></canvas>
-        </div>
-
-        <div class="kpi-matrix">
-          <div class="kpi-tile">
-            <span class="kpi-name" id="kpiLabelPrimary">PRIMARY METRIC</span>
-            <span class="kpi-number" id="kpiValPrimary">--</span>
-            <span class="kpi-sub">Satellite Reading</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="kpi-name" id="kpiLabelSecondary">SECONDARY METRIC</span>
-            <span class="kpi-number" id="kpiValSecondary">--</span>
-            <span class="kpi-sub">Intensity Factor</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="kpi-name">SYNTH FREQUENCY</span>
-            <span class="kpi-number" id="kpiValFreq">220 Hz</span>
-            <span class="kpi-sub" id="kpiSubNote">Note: A3</span>
-          </div>
-          <div class="kpi-tile">
-            <span class="kpi-name">DELTA ANOMALY JUMP</span>
-            <span class="kpi-number" id="kpiValDelta">0.0</span>
-            <span class="kpi-sub">Epoch Shift</span>
-          </div>
-        </div>
-
-        <div class="anomaly-console" id="anomalyConsole">
-          <div class="console-text-group">
-            <div class="console-eyebrow">LIVE SONIFICATION INTERPRETATION (DATA ➔ SOUND)</div>
-            <div class="console-headline" id="explanationBannerText">
-              Click "▶ Play Master Sonification" below to stream all 15 NASA historical epochs.
-            </div>
-          </div>
-          <div class="status-pill" id="anomalyStatusPill">BASELINE STABLE</div>
-        </div>
-      </div>
-
-      <div class="glass-panel cockpit-right">
-        <div class="panel-header">
-          <div class="panel-title">🎛️ 5-Channel Synth Mixer</div>
-          <span class="panel-tag">LIVE DSP</span>
-        </div>
-
-        <div class="mixer-channels">
-          <div class="channel-row">
-            <div class="channel-top">
-              <span class="channel-name">🎹 CH1: Harmonic Lead Pitch</span>
-              <button class="mute-toggle" id="mute-lead" onclick="toggleChannelMute('lead')">ON</button>
-            </div>
-            <input type="range" class="synth-slider" id="vol-lead" min="0" max="100" value="80" />
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-top">
-              <span class="channel-name">🔊 CH2: Deep Sub-Bass Drone</span>
-              <button class="mute-toggle" id="mute-bass" onclick="toggleChannelMute('bass')">ON</button>
-            </div>
-            <input type="range" class="synth-slider" id="vol-bass" min="0" max="100" value="70" />
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-top">
-              <span class="channel-name">🌪️ CH3: Procedural Weather FX</span>
-              <button class="mute-toggle" id="mute-noise" onclick="toggleChannelMute('noise')">ON</button>
-            </div>
-            <input type="range" class="synth-slider" id="vol-noise" min="0" max="100" value="65" />
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-top">
-              <span class="channel-name">🥁 CH4: Rhythmic Pulse & Kick</span>
-              <button class="mute-toggle" id="mute-perc" onclick="toggleChannelMute('perc')">ON</button>
-            </div>
-            <input type="range" class="synth-slider" id="vol-perc" min="0" max="100" value="75" />
-          </div>
-
-          <div class="channel-row">
-            <div class="channel-top">
-              <span class="channel-name">🚨 CH5: Anomaly Siren & Echo</span>
-              <button class="mute-toggle" id="mute-siren" onclick="toggleChannelMute('siren')">ON</button>
-            </div>
-            <input type="range" class="synth-slider" id="vol-siren" min="0" max="100" value="85" />
-          </div>
-        </div>
-
-        <div class="panel-header" style="margin-top: 4px;">
-          <div class="panel-title">⚡ Live DJ Soundboard</div>
-          <span class="panel-tag">CLICK PADS</span>
-        </div>
-
-        <div class="fx-pad-grid">
-          <button class="fx-pad" onclick="triggerSoundPad('sonar', this)">📡 Satellite Ping</button>
-          <button class="fx-pad" onclick="triggerSoundPad('thunder', this)">⛈️ Monsoon Burst</button>
-          <button class="fx-pad" onclick="triggerSoundPad('subdrop', this)">💥 808 Sub-Drop</button>
-          <button class="fx-pad" onclick="triggerSoundPad('icecrack', this)">🧊 Glacier Fracture</button>
-          <button class="fx-pad" onclick="triggerSoundPad('geiger', this)">☢️ Geiger Radiation</button>
-          <button class="fx-pad" onclick="triggerSoundPad('siren', this)">🚨 Red Alert Klaxon</button>
-          <button class="fx-pad" onclick="triggerSoundPad('swell', this)">🌊 Deep Swell</button>
-          <button class="fx-pad" onclick="triggerSoundPad('laser', this)">✨ Orbital Sweep</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="transport-deck">
-      <div class="transport-controls">
-        <div class="transport-left">
-          <button class="play-master-btn" id="masterPlayBtn" onclick="toggleMasterPlay()">
-            ▶ PLAY MASTER SONIFICATION
+    <!-- MASTER TRANSPORT & TIMELINE SCRUBBER CONSOLE -->
+    <section class="master-transport-console">
+      <div class="transport-bar-row">
+        <div class="transport-cluster">
+          <button class="master-launch-btn" id="masterPlayBtn" onclick="toggleMasterPlay()">
+            ▶ LAUNCH MASTER SONIFICATION
           </button>
-          <button class="cyber-btn" onclick="stopMasterAudio()">■ STOP & RESET</button>
-          <button class="cyber-btn" onclick="stepBackward()">⏮ PREV</button>
-          <button class="cyber-btn" onclick="stepForward()">⏭ NEXT</button>
+          <button class="holo-btn" onclick="stopMasterAudio()">■ STOP & RESET</button>
+          <button class="holo-btn" onclick="stepBackward()">⏮ PREV EPOCH</button>
+          <button class="holo-btn" onclick="stepForward()">⏭ NEXT EPOCH</button>
         </div>
 
-        <div class="transport-center">
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">SPEED:</span>
-          <button class="cyber-btn" id="speed-0.5" onclick="changeSpeed(0.5)">0.5x</button>
-          <button class="cyber-btn active" id="speed-1" onclick="changeSpeed(1)">1x</button>
-          <button class="cyber-btn" id="speed-1.5" onclick="changeSpeed(1.5)">1.5x</button>
-          <button class="cyber-btn" id="speed-2" onclick="changeSpeed(2)">2x</button>
+        <div class="transport-cluster">
+          <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);">TEMPO:</span>
+          <button class="holo-btn" id="speed-0.5" onclick="changeSpeed(0.5)">0.5x</button>
+          <button class="holo-btn active" id="speed-1" onclick="changeSpeed(1)">1x</button>
+          <button class="holo-btn" id="speed-1.5" onclick="changeSpeed(1.5)">1.5x</button>
+          <button class="holo-btn" id="speed-2" onclick="changeSpeed(2)">2x</button>
         </div>
 
-        <div class="transport-right">
-          <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: var(--theme);" id="stepProgressText">
-            STEP 01 / 15 (YEAR 1980)
+        <div class="transport-cluster">
+          <div style="font-family: var(--font-display); font-size: 14px; font-weight: 900; color: var(--theme);" id="stepProgressText">
+            STEP 01 / 20 (YEAR 1980)
           </div>
         </div>
       </div>
 
-      <div class="timeline-scrubber-wrap">
-        <input type="range" id="masterScrubber" min="0" max="14" value="0" oninput="scrubTimeline(this.value)" />
-        <div class="timeline-ticks" id="timelineTicksContainer"></div>
+      <div class="scrubber-container">
+        <input type="range" id="masterScrubber" min="0" max="19" value="0" oninput="scrubTimeline(this.value)" />
+        <div class="timeline-epoch-ticks" id="timelineTicksContainer"></div>
       </div>
     </section>
 
-    <section class="bottom-matrix-grid">
-      <div class="glass-panel">
-        <div class="panel-header">
-          <div class="panel-title">🗂️ NASA 15-Epoch Archival Matrix (Click Row to Audition)</div>
-          <span class="panel-tag">3-MEMORY JSON</span>
+    <!-- BOTTOM HISTORICAL DATA MATRIX & LIVE TELEMETRY LOG -->
+    <section class="bottom-archive-grid">
+      <div class="hud-module">
+        <div class="module-header">
+          <div class="module-title">🗂️ 20-Epoch NASA Archival Telemetry Matrix (Click Any Row to Audition)</div>
+          <span class="module-badge">3-MEMORY SYNC</span>
         </div>
-        <div class="table-scroll">
-          <table class="nasa-table">
+        <div class="matrix-table-viewport">
+          <table class="quantum-table">
             <thead>
               <tr>
-                <th>YEAR</th>
+                <th>EPOCH</th>
                 <th id="thPrimary">PRIMARY</th>
                 <th id="thSecondary">SECONDARY</th>
-                <th>SYNTH FREQ</th>
-                <th>HISTORICAL INTERPRETATION</th>
+                <th>SYNTH PITCH</th>
+                <th>NASA SCIENTIFIC INTERPRETATION</th>
               </tr>
             </thead>
             <tbody id="archiveTableBody"></tbody>
@@ -299,71 +410,91 @@
         </div>
       </div>
 
-      <div class="glass-panel">
-        <div class="panel-header">
-          <div class="panel-title">🖥️ Telemetry Log</div>
-          <span class="panel-tag">DSP READY</span>
+      <div class="hud-module">
+        <div class="module-header">
+          <div class="module-title">🖥️ META BEATS Acoustic Telemetry Log</div>
+          <span class="module-badge">REAL-TIME DSP</span>
         </div>
-        <div class="terminal-log" id="terminalLogBox">
-          <div class="log-entry">[SYSTEM] 1-Frontend HTML + style.css linked.</div>
-          <div class="log-entry">[3-MEMORY] 15-Epoch NASA datasets ready.</div>
+        <div class="dsp-terminal-box" id="terminalLogBox">
+          <div class="terminal-line">[META BEATS] Quantum Planetary Sonification Studio Online.</div>
+          <div class="terminal-line">[3-MEMORY] Loaded 20-epoch NASA satellite datasets.</div>
         </div>
       </div>
     </section>
+
+    <!-- FOOTER -->
+    <footer class="meta-footer">
+      <div><strong>TEAM META BEATS</strong> // NASA SPACE APPS CHALLENGE — PLANETARY SONIFICATION STUDIO</div>
+      <div>ARCHITECTURE: <strong>1-FRONTEND ➔ 2-BACKEND ➔ 3-MEMORY</strong> // LEAD DEV: <strong>SHIVAM RAJ</strong></div>
+    </footer>
+
   </div>
 
   <script>
+    /********************************************************************
+     * 1. EXPANDED 20-EPOCH NASA SATELLITE ARCHIVES (WITH INSTANT FALLBACK)
+     ********************************************************************/
     const FALLBACK_ARCHIVE = {
       rain: {
         datasetId: "rain",
         title: "Atmospheric Temp & Monsoon Extremes (1980–2025)",
         source: "NASA POWER (MERRA-2) & GPM IMERG Satellite Archive",
         coords: "LAT: 12.97° N | LON: 77.59° E (SOUTH ASIA MONSOON CORE)",
-        satellite: "GPM Core Observatory / Terra",
+        satellite: "GPM Core Observatory / Terra MERRA-2",
         unitPrimary: "°C (Peak Avg)",
         unitSecondary: "mm (Max Daily Burst)",
         records: [
-          { index: 0, date: "1980", raw: { primary: 26.8, secondary: 38.0 }, norm: { pitch: 0.10, intensity: 0.15 }, explanation: "1980 Pre-GPM Baseline: Calm 26.8°C regional average with steady 38mm monsoon precipitation." },
-          { index: 1, date: "1985", raw: { primary: 27.1, secondary: 42.0 }, norm: { pitch: 0.15, intensity: 0.20 }, explanation: "1985 Baseline: Stable 27.1°C temperature with moderate 42mm monsoon rain." },
-          { index: 2, date: "1988", raw: { primary: 27.3, secondary: 58.4 }, norm: { pitch: 0.22, intensity: 0.31 }, explanation: "1988 La Niña Surge: Heavy monsoon trough brings 58.4mm intense regional downpours." },
-          { index: 3, date: "1990", raw: { primary: 27.4, secondary: 51.5 }, norm: { pitch: 0.25, intensity: 0.28 }, explanation: "1990: Slight warming (+0.3°C). Pitch rises gently with light rain harmonics." },
-          { index: 4, date: "1994", raw: { primary: 27.7, secondary: 64.2 }, norm: { pitch: 0.33, intensity: 0.39 }, explanation: "1994 Positive Indian Ocean Dipole: Moisture convergence boosts cloudburst intensity." },
-          { index: 5, date: "1995", raw: { primary: 27.9, secondary: 68.0 }, norm: { pitch: 0.38, intensity: 0.42 }, explanation: "1995: Noticeable thermal shift to 27.9°C; heavier 68mm cloudbursts trigger brighter chime." },
-          { index: 6, date: "1998", raw: { primary: 28.5, secondary: 82.0 }, norm: { pitch: 0.54, "intensity": 0.52 }, explanation: "1998 Super El Niño Anomaly: Sharp +0.6°C thermal spike triggers mid-high harmonic alert." },
-          { index: 7, date: "2000", raw: { primary: 28.2, secondary: 59.0 }, norm: { pitch: 0.48, intensity: 0.35 }, explanation: "2000: Millennial baseline reaches 28.2°C; mid-frequency synth tone stabilizes." },
-          { index: 8, date: "2005", raw: { primary: 28.8, secondary: 94.5 }, norm: { pitch: 0.62, intensity: 0.65 }, explanation: "2005 Extreme Cloudburst: Sharp jump to 94.5mm extreme rain! High-pitch raindrop arpeggio activates." },
-          { index: 9, date: "2010", raw: { primary: 29.3, secondary: 112.0 }, norm: { pitch: 0.74, intensity: 0.78 }, explanation: "2010 El Niño Effect: 29.3°C heat pushes pitch higher with louder storm resonance." },
-          { index: 10, date: "2015", raw: { primary: 29.8, secondary: 128.4 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2015 Record Heat: Near 30°C threshold. High-frequency alert harmonics engage." },
-          { index: 11, date: "2018", raw: { primary: 30.0, secondary: 139.2 }, norm: { pitch: 0.89, intensity: 0.90 }, explanation: "2018 Severe Flooding Epoch: GPM IMERG records 139.2mm convective burst." },
-          { index: 12, date: "2020", raw: { primary: 30.2, secondary: 145.0 }, norm: { pitch: 0.92, intensity: 0.94 }, explanation: "2020 Extreme Event: 145mm flash rain burst creates rapid high-pitch acoustic shimmer." },
-          { index: 13, date: "2023", raw: { primary: 30.6, secondary: 154.8 }, norm: { pitch: 0.96, intensity: 0.97 }, explanation: "2023 Thermal Record: 30.6°C land-atmosphere coupling drives extreme monsoon volatility." },
-          { index: 14, date: "2025", raw: { primary: 30.9, secondary: 164.0 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Peak Anomaly: +4.1°C above 1980 baseline. Maximum pitch & full harmonic intensity." }
+          { index: 0, date: "1980", raw: { primary: 26.8, secondary: 38.0 }, norm: { pitch: 0.08, intensity: 0.14 }, explanation: "1980 Baseline: Calm 26.8°C regional average with steady 38mm monsoon precipitation." },
+          { index: 1, date: "1983", raw: { primary: 27.0, secondary: 44.5 }, norm: { pitch: 0.12, intensity: 0.18 }, explanation: "1983: Early satellite radiometry shows stable seasonal monsoon trough." },
+          { index: 2, date: "1985", raw: { primary: 27.1, secondary: 42.0 }, norm: { pitch: 0.15, intensity: 0.20 }, explanation: "1985: Moderate 27.1°C temperature with balanced 42mm rainfall harmonics." },
+          { index: 3, date: "1988", raw: { primary: 27.3, secondary: 58.4 }, norm: { pitch: 0.22, intensity: 0.31 }, explanation: "1988 La Niña Surge: Heavy monsoon trough brings 58.4mm regional downpours." },
+          { index: 4, date: "1990", raw: { primary: 27.4, secondary: 51.5 }, norm: { pitch: 0.25, intensity: 0.28 }, explanation: "1990: Slight warming (+0.3°C). Pitch rises gently with light rain harmonics." },
+          { index: 5, date: "1992", raw: { primary: 27.6, secondary: 60.1 }, norm: { pitch: 0.30, intensity: 0.34 }, explanation: "1992 post-Pinatubo aerosol cooling followed by moisture rebound." },
+          { index: 6, date: "1994", raw: { primary: 27.7, secondary: 64.2 }, norm: { pitch: 0.34, intensity: 0.39 }, explanation: "1994 Positive Indian Ocean Dipole boosts cloudburst intensity." },
+          { index: 7, date: "1995", raw: { primary: 27.9, secondary: 68.0 }, norm: { pitch: 0.38, intensity: 0.42 }, explanation: "1995: Thermal shift to 27.9°C; heavier 68mm cloudbursts trigger brighter chime." },
+          { index: 8, date: "1998", raw: { primary: 28.5, secondary: 82.0 }, norm: { pitch: 0.54, intensity: 0.52 }, explanation: "1998 Super El Niño Anomaly: Sharp +0.6°C thermal spike triggers harmonic alert!" },
+          { index: 9, date: "2000", raw: { primary: 28.2, secondary: 59.0 }, norm: { pitch: 0.48, intensity: 0.35 }, explanation: "2000: Millennial baseline reaches 28.2°C; mid-frequency synth tone stabilizes." },
+          { index: 10, date: "2003", raw: { primary: 28.6, secondary: 76.4 }, norm: { pitch: 0.56, intensity: 0.49 }, explanation: "2003 Pre-Monsoon Heatwave: Land-surface warming intensifies convective updrafts." },
+          { index: 11, date: "2005", raw: { primary: 28.8, secondary: 94.5 }, norm: { pitch: 0.64, intensity: 0.65 }, explanation: "2005 Extreme Cloudburst: Sharp jump to 94.5mm rain! High-pitch arpeggio activates." },
+          { index: 12, date: "2008", raw: { primary: 29.0, secondary: 103.2 }, norm: { pitch: 0.69, intensity: 0.71 }, explanation: "2008: Crosses 100mm daily extreme precipitation threshold." },
+          { index: 13, date: "2010", raw: { primary: 29.3, secondary: 112.0 }, norm: { pitch: 0.74, intensity: 0.78 }, explanation: "2010 El Niño Effect: 29.3°C heat pushes pitch higher with louder storm resonance." },
+          { index: 14, date: "2013", raw: { primary: 29.5, secondary: 121.0 }, norm: { pitch: 0.79, intensity: 0.82 }, explanation: "2013 Early Monsoon Burst: Rapid multi-day extreme rainfall recorded." },
+          { index: 15, date: "2015", raw: { primary: 29.8, secondary: 128.4 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2015 Record Heat: Near 30°C threshold. High-frequency alert harmonics engage." },
+          { index: 16, date: "2018", raw: { primary: 30.0, secondary: 139.2 }, norm: { pitch: 0.89, intensity: 0.90 }, explanation: "2018 Severe Flooding Epoch: GPM IMERG records 139.2mm convective burst." },
+          { index: 17, date: "2020", raw: { primary: 30.2, secondary: 145.0 }, norm: { pitch: 0.93, intensity: 0.94 }, explanation: "2020 Extreme Event: 145mm flash rain burst creates rapid high-pitch shimmer." },
+          { index: 18, date: "2023", raw: { primary: 30.6, secondary: 154.8 }, norm: { pitch: 0.97, intensity: 0.97 }, explanation: "2023 Thermal Record: 30.6°C land-atmosphere coupling drives extreme volatility." },
+          { index: 19, date: "2025", raw: { primary: 30.9, secondary: 164.0 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Peak Anomaly: +4.1°C above 1980 baseline. Maximum pitch & full harmonic intensity." }
         ]
       },
       ocean: {
         datasetId: "ocean",
         title: "Indian Ocean Thermal Expansion & Swell (1993–2025)",
         source: "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason-3/Sentinel-6 Altimetry",
-        coords: "LAT: 08.40° N | LON: 73.10° E (ARABIAN SEA / INDIAN OCEAN)",
+        coords: "LAT: 08.40° N | LON: 73.10° E (ARABIAN SEA / EQUATORIAL INDIAN OCEAN)",
         satellite: "Jason-3 / MODIS Aqua / Sentinel-6",
         unitPrimary: "°C (Sea Surface)",
         unitSecondary: "mm (Sea Level Rise)",
         records: [
-          { index: 0, date: "1993", raw: { primary: 26.8, secondary: 0.0 }, norm: { pitch: 0.12, intensity: 0.15 }, explanation: "1993 TOPEX/Poseidon Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
-          { index: 1, date: "1995", raw: { primary: 27.0, secondary: 6.4 }, norm: { pitch: 0.19, intensity: 0.21 }, explanation: "1995: Early altimetry tracks +6.4mm steric sea level expansion." },
-          { index: 2, date: "1997", raw: { primary: 27.3, secondary: 14.2 }, norm: { pitch: 0.28, intensity: 0.30 }, explanation: "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
-          { index: 3, date: "1999", raw: { primary: 27.4, secondary: 20.1 }, norm: { pitch: 0.32, intensity: 0.34 }, explanation: "1999 La Niña Rebound: Subsurface heat uptake continues steady upward trend." },
-          { index: 4, date: "2001", raw: { primary: 27.5, secondary: 26.8 }, norm: { pitch: 0.36, intensity: 0.38 }, explanation: "2001 Jason-1 Calibration: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
-          { index: 5, date: "2003", raw: { primary: 27.7, secondary: 33.5 }, norm: { pitch: 0.43, intensity: 0.44 }, explanation: "2003 MODIS Aqua Era: High-resolution IR radiometry confirms basin-wide warming." },
-          { index: 6, date: "2005", raw: { primary: 27.9, secondary: 41.0 }, norm: { pitch: 0.50, intensity: 0.50 }, explanation: "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
-          { index: 7, date: "2008", raw: { primary: 28.1, secondary: 49.4 }, norm: { pitch: 0.58, intensity: 0.57 }, explanation: "2008 OSTM/Jason-2 Launch: Sea level crosses +49mm above 1993 reference ellipsoid." },
-          { index: 8, date: "2010", raw: { primary: 28.4, secondary: 58.5 }, norm: { pitch: 0.66, intensity: 0.65 }, explanation: "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
-          { index: 9, date: "2013", raw: { primary: 28.6, secondary: 67.8 }, norm: { pitch: 0.73, intensity: 0.72 }, explanation: "2013: Accelerated thermosteric expansion in the Arabian Sea basin." },
-          { index: 10, date: "2016", raw: { primary: 29.1, secondary: 79.2 }, norm: { pitch: 0.84, intensity: 0.82 }, explanation: "2016 Coral Bleaching Peak: +0.5°C jump! Sharp pitch rise and heavy vibrato." },
-          { index: 11, date: "2018", raw: { primary: 29.2, secondary: 86.5 }, norm: { pitch: 0.88, intensity: 0.86 }, explanation: "2018 Cyclone Intensification: High ocean heat content fuels rapid storm spin-up." },
-          { index: 12, date: "2020", raw: { primary: 29.4, secondary: 94.0 }, norm: { pitch: 0.92, intensity: 0.90 }, explanation: "2020 Sentinel-6 Era: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
-          { index: 13, date: "2023", raw: { primary: 29.7, secondary: 103.8 }, norm: { pitch: 0.96, intensity: 0.96 }, explanation: "2023 Global SST Anomaly: Exceeds 100mm cumulative regional sea-level rise." },
-          { index: 14, date: "2025", raw: { primary: 29.9, secondary: 112.4 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Critical Thermal High: 29.9°C & +112.4mm rise. Peak frequency & maximum wave pulse." }
+          { index: 0, date: "1993", raw: { primary: 26.8, secondary: 0.0 }, norm: { pitch: 0.10, intensity: 0.12 }, explanation: "1993 TOPEX/Poseidon Launch Baseline: Calm 26.8°C ocean. Low sine-wave pad." },
+          { index: 1, date: "1995", raw: { primary: 27.0, secondary: 6.4 }, norm: { pitch: 0.16, intensity: 0.18 }, explanation: "1995: Early altimetry tracks +6.4mm steric sea level expansion." },
+          { index: 2, date: "1997", raw: { primary: 27.3, secondary: 14.2 }, norm: { pitch: 0.25, intensity: 0.28 }, explanation: "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm rise." },
+          { index: 3, date: "1999", raw: { primary: 27.4, secondary: 20.1 }, norm: { pitch: 0.30, intensity: 0.32 }, explanation: "1999 La Niña Rebound: Subsurface heat uptake continues steady upward trend." },
+          { index: 4, date: "2001", raw: { primary: 27.5, secondary: 26.8 }, norm: { pitch: 0.35, intensity: 0.37 }, explanation: "2001 Jason-1 Calibration: Steady thermal absorption (+26.8mm)." },
+          { index: 5, date: "2003", raw: { primary: 27.7, secondary: 33.5 }, norm: { pitch: 0.41, intensity: 0.42 }, explanation: "2003 MODIS Aqua Era: High-resolution IR radiometry confirms basin warming." },
+          { index: 6, date: "2005", raw: { primary: 27.9, secondary: 41.0 }, norm: { pitch: 0.48, intensity: 0.49 }, explanation: "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
+          { index: 7, date: "2007", raw: { primary: 28.0, secondary: 45.2 }, norm: { pitch: 0.53, intensity: 0.53 }, explanation: "2007: Sustained tropical Indian Ocean heat storage." },
+          { index: 8, date: "2008", raw: { primary: 28.1, secondary: 49.4 }, norm: { pitch: 0.57, intensity: 0.57 }, explanation: "2008 OSTM/Jason-2 Launch: Sea level crosses +49mm above 1993 reference." },
+          { index: 9, date: "2010", raw: { primary: 28.4, secondary: 58.5 }, norm: { pitch: 0.65, intensity: 0.65 }, explanation: "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
+          { index: 10, date: "2012", raw: { primary: 28.5, secondary: 63.1 }, norm: { pitch: 0.69, intensity: 0.68 }, explanation: "2012: Deepening thermocline anomaly across the Arabian Sea." },
+          { index: 11, date: "2013", raw: { primary: 28.6, secondary: 67.8 }, norm: { pitch: 0.73, intensity: 0.72 }, explanation: "2013: Accelerated thermosteric expansion in the equatorial basin." },
+          { index: 12, date: "2015", raw: { primary: 28.9, secondary: 74.0 }, norm: { pitch: 0.79, intensity: 0.78 }, explanation: "2015 Indo-Pacific Warm Pool expansion drives strong acoustic resonance." },
+          { index: 13, date: "2016", raw: { primary: 29.1, secondary: 79.2 }, norm: { pitch: 0.84, intensity: 0.82 }, explanation: "2016 Coral Bleaching Peak: Sharp SST jump triggers vibrato alert!" },
+          { index: 14, date: "2018", raw: { primary: 29.2, secondary: 86.5 }, norm: { pitch: 0.87, intensity: 0.86 }, explanation: "2018 Cyclone Intensification: High ocean heat content fuels rapid storm spin-up." },
+          { index: 15, date: "2020", raw: { primary: 29.4, secondary: 94.0 }, norm: { pitch: 0.91, intensity: 0.90 }, explanation: "2020 Sentinel-6 Era: Sea level +94mm above 1993 baseline." },
+          { index: 16, date: "2021", raw: { primary: 29.5, secondary: 98.4 }, norm: { pitch: 0.93, intensity: 0.93 }, explanation: "2021: Continuous upper-ocean heat accumulation." },
+          { index: 17, date: "2023", raw: { primary: 29.7, secondary: 103.8 }, norm: { pitch: 0.96, intensity: 0.96 }, explanation: "2023 Global SST Anomaly: Exceeds 100mm cumulative regional sea-level rise." },
+          { index: 18, date: "2024", raw: { primary: 29.8, secondary: 108.1 }, norm: { pitch: 0.98, intensity: 0.98 }, explanation: "2024 Record Basin Heat: Intense thermal stratification." },
+          { index: 19, date: "2025", raw: { primary: 29.9, secondary: 112.4 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Critical Thermal High: 29.9°C & +112.4mm rise. Peak frequency swell." }
         ]
       },
       glacier: {
@@ -371,25 +502,30 @@
         title: "Antarctica & Greenland Polar Ice Mass Loss (2002–2025)",
         source: "NASA GRACE & GRACE-FO Satellite Gravimetry & ICESat-2",
         coords: "LAT: 75.00° S | LON: 105.00° W (AMUNDSEN SEA / THWAITES SECTOR)",
-        satellite: "GRACE-FO / ICESat-2 Altimeter",
+        satellite: "GRACE-FO / ICESat-2 Laser Altimeter",
         unitPrimary: "Gigatonnes (Gt Ice Loss)",
         unitSecondary: "Gt/yr (Melt Acceleration)",
         records: [
-          { index: 0, date: "2002", raw: { primary: 0, secondary: 85 }, norm: { pitch: 0.12, intensity: 0.14 }, explanation: "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
-          { index: 1, date: "2004", raw: { primary: -240, secondary: 98 }, norm: { pitch: 0.20, intensity: 0.21 }, explanation: "2004 (-240 Gt): Early gravimetric detection of Jakobshavn & Pine Island thinning." },
-          { index: 2, date: "2005", raw: { primary: -410, secondary: 115 }, norm: { pitch: 0.28, intensity: 0.28 }, explanation: "2005 (-410 Gt lost): Initial ice shelf basal melt raises tension pitch." },
-          { index: 3, date: "2007", raw: { primary: -680, secondary: 134 }, norm: { pitch: 0.35, intensity: 0.36 }, explanation: "2007 Arctic Summer Minimum: Surface meltwater lakes accelerate glacier slip." },
-          { index: 4, date: "2008", raw: { primary: -890, secondary: 148 }, norm: { pitch: 0.42, intensity: 0.42 }, explanation: "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
-          { index: 5, date: "2010", raw: { primary: -1190, secondary: 172 }, norm: { pitch: 0.51, intensity: 0.52 }, explanation: "2010 (-1,190 Gt): Cumulative polar mass loss crosses 1 trillion metric tonnes." },
-          { index: 6, date: "2012", raw: { primary: -1540, secondary: 195 }, norm: { pitch: 0.62, intensity: 0.64 }, explanation: "2012 Extreme Melt Year (-1,540 Gt): 97% Greenland surface melt triggers high-delta alarm!" },
-          { index: 7, date: "2014", raw: { primary: -1820, secondary: 204 }, norm: { pitch: 0.68, intensity: 0.70 }, explanation: "2014 (-1,820 Gt): Warm circumpolar deep water erodes West Antarctic grounding lines." },
-          { index: 8, date: "2016", raw: { primary: -2110, secondary: 215 }, norm: { pitch: 0.74, intensity: 0.75 }, explanation: "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
-          { index: 9, date: "2018", raw: { primary: -2390, secondary: 232 }, norm: { pitch: 0.81, intensity: 0.82 }, explanation: "2018 GRACE-FO & ICESat-2 Launch: Laser altimetry maps steepening glacier calving fronts." },
-          { index: 10, date: "2019", raw: { primary: -2540, secondary: 248 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2019 Atmospheric Blocking Event: Extreme Greenland mass balance deficit." },
-          { index: 11, date: "2020", raw: { primary: -2680, secondary: 255 }, norm: { pitch: 0.88, intensity: 0.88 }, explanation: "2020 GRACE-FO Record (-2,680 Gt): Rapid Thwaites & Pine Island ice shelf retreat." },
-          { index: 12, date: "2022", raw: { primary: -2940, secondary: 271 }, norm: { pitch: 0.93, intensity: 0.93 }, explanation: "2022 Late-Season Heatwave (-2,940 Gt): High-elevation melt events recorded." },
-          { index: 13, date: "2024", raw: { primary: -3150, secondary: 282 }, norm: { pitch: 0.97, intensity: 0.97 }, explanation: "2024 (-3,150 Gt): Over 3.1 trillion tonnes lost since 2002 baseline." },
-          { index: 14, date: "2025", raw: { primary: -3340, secondary: 295 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Cumulative Loss (-3,340 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
+          { index: 0, date: "2002", raw: { primary: 0, secondary: 85 }, norm: { pitch: 0.10, intensity: 0.12 }, explanation: "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
+          { index: 1, date: "2003", raw: { primary: -115, secondary: 92 }, norm: { pitch: 0.15, intensity: 0.16 }, explanation: "2003 (-115 Gt): Initial twin-satellite gravity field calibration." },
+          { index: 2, date: "2004", raw: { primary: -240, secondary: 98 }, norm: { pitch: 0.20, intensity: 0.21 }, explanation: "2004 (-240 Gt): Gravimetric detection of Jakobshavn & Pine Island thinning." },
+          { index: 3, date: "2005", raw: { primary: -410, secondary: 115 }, norm: { pitch: 0.26, intensity: 0.27 }, explanation: "2005 (-410 Gt lost): Ice shelf basal melt raises tension pitch." },
+          { index: 4, date: "2007", raw: { primary: -680, secondary: 134 }, norm: { pitch: 0.34, intensity: 0.35 }, explanation: "2007 Arctic Summer Minimum: Surface meltwater lakes accelerate glacier slip." },
+          { index: 5, date: "2008", raw: { primary: -890, secondary: 148 }, norm: { pitch: 0.41, intensity: 0.42 }, explanation: "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr." },
+          { index: 6, date: "2010", raw: { primary: -1190, secondary: 172 }, norm: { pitch: 0.50, intensity: 0.52 }, explanation: "2010 (-1,190 Gt): Cumulative polar mass loss crosses 1 trillion tonnes." },
+          { index: 7, date: "2011", raw: { primary: -1350, secondary: 184 }, norm: { pitch: 0.56, intensity: 0.58 }, explanation: "2011 (-1,350 Gt): Steepening mass deficit in West Antarctica." },
+          { index: 8, date: "2012", raw: { primary: -1540, secondary: 195 }, norm: { pitch: 0.63, intensity: 0.65 }, explanation: "2012 Extreme Melt Year (-1,540 Gt): 97% Greenland surface melt triggers alarm!" },
+          { index: 9, date: "2014", raw: { primary: -1820, secondary: 204 }, norm: { pitch: 0.69, intensity: 0.70 }, explanation: "2014 (-1,820 Gt): Warm circumpolar deep water erodes grounding lines." },
+          { index: 10, date: "2015", raw: { primary: -1960, secondary: 210 }, norm: { pitch: 0.72, intensity: 0.73 }, explanation: "2015 (-1,960 Gt): Rapid Jakobshavn calving front retreat." },
+          { index: 11, date: "2016", raw: { primary: -2110, secondary: 215 }, norm: { pitch: 0.76, intensity: 0.76 }, explanation: "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost." },
+          { index: 12, date: "2017", raw: { primary: -2250, secondary: 224 }, norm: { pitch: 0.79, intensity: 0.79 }, explanation: "2017 (-2,250 Gt): Larsen C tabular iceberg calving event." },
+          { index: 13, date: "2018", raw: { primary: -2390, secondary: 232 }, norm: { pitch: 0.82, intensity: 0.82 }, explanation: "2018 GRACE-FO & ICESat-2 Launch: Laser altimetry maps glacier thinning." },
+          { index: 14, date: "2019", raw: { primary: -2540, secondary: 248 }, norm: { pitch: 0.86, intensity: 0.86 }, explanation: "2019 Atmospheric Blocking Event: Extreme Greenland mass balance deficit." },
+          { index: 15, date: "2020", raw: { primary: -2680, secondary: 255 }, norm: { pitch: 0.89, intensity: 0.89 }, explanation: "2020 GRACE-FO Record (-2,680 Gt): Rapid Thwaites ice shelf retreat." },
+          { index: 16, date: "2021", raw: { primary: -2810, secondary: 263 }, norm: { pitch: 0.92, intensity: 0.92 }, explanation: "2021 (-2,810 Gt): Rain observed at Greenland Summit Station." },
+          { index: 17, date: "2022", raw: { primary: -2940, secondary: 271 }, norm: { pitch: 0.95, intensity: 0.95 }, explanation: "2022 Late-Season Heatwave (-2,940 Gt): High-elevation melt events." },
+          { index: 18, date: "2024", raw: { primary: -3150, secondary: 282 }, norm: { pitch: 0.98, intensity: 0.98 }, explanation: "2024 (-3,150 Gt): Over 3.1 trillion tonnes lost since 2002 baseline." },
+          { index: 19, date: "2025", raw: { primary: -3340, secondary: 295 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Cumulative Loss (-3,340 Gt): Maximum anomaly! Siren & bass sub-drop." }
         ]
       }
     };
@@ -409,19 +545,98 @@
 
     const channelMutes = { lead: false, bass: false, noise: false, perc: false, siren: false };
 
+    // 16-Step Sequencer Pattern State
+    const seqTracks = [
+      { name: 'CH1 • SYNTH ARP', pattern: [1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1] },
+      { name: 'CH2 • SUB PULSE', pattern: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0] },
+      { name: 'CH3 • ATMO NOISE', pattern: [0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 1] },
+      { name: 'CH4 • 808 KICK',  pattern: [1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0] }
+    ];
+
+    /********************************************************************
+     * 2. INTERACTIVE PIANO KEYBOARD & 16-STEP SEQUENCER UI BUILDERS
+     ********************************************************************/
+    function buildPianoKeyboard() {
+      const container = document.getElementById('pianoKeysContainer');
+      container.innerHTML = NOTE_NAMES.map((note, idx) => `
+        <div class="synth-key" id="key-${idx}" onclick="auditionPianoKey(${idx})">
+          <span style="font-size: 8px; opacity: 0.65;">${Math.round(SCALE_FREQS[idx])}</span>
+          <strong>${note}</strong>
+        </div>
+      `).join('');
+    }
+
+    function auditionPianoKey(scaleIdx) {
+      initAudioEngine();
+      const freq = SCALE_FREQS[scaleIdx];
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = activeTrack === 'rain' ? 'triangle' : activeTrack === 'ocean' ? 'sine' : 'sawtooth';
+      osc.frequency.setValueAtTime(freq, now);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+      osc.connect(gain);
+      gain.connect(masterDelay);
+      osc.start(now);
+      osc.stop(now + 0.55);
+
+      highlightActivePianoKey(scaleIdx);
+      appendLog(`[SYNTH KEYBOARD] Auditioned Note ${NOTE_NAMES[scaleIdx]} (${freq} Hz)`);
+    }
+
+    function highlightActivePianoKey(scaleIdx) {
+      NOTE_NAMES.forEach((_, i) => {
+        const k = document.getElementById(`key-${i}`);
+        if (k) k.classList.toggle('active-key', i === scaleIdx);
+      });
+    }
+
+    function buildSequencerGrid() {
+      const box = document.getElementById('sequencerGridBox');
+      box.innerHTML = seqTracks.map((t, rIdx) => `
+        <div class="sequencer-matrix-panel">
+          <div class="seq-row-label">${t.name}</div>
+          <div class="seq-steps-16">
+            ${t.pattern.map((val, cIdx) => `
+              <div class="seq-cell ${val ? 'seq-on' : ''}" id="seq-${rIdx}-${cIdx}" onclick="toggleSeqCell(${rIdx}, ${cIdx})"></div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleSeqCell(r, c) {
+      seqTracks[r].pattern[c] = seqTracks[r].pattern[c] ? 0 : 1;
+      const el = document.getElementById(`seq-${r}-${c}`);
+      if (el) el.classList.toggle('seq-on', !!seqTracks[r].pattern[c]);
+    }
+
+    function switchStudioView(viewName, btnEl) {
+      ['cockpit', 'sequencer', 'team'].forEach(v => {
+        const el = document.getElementById(`view-${v}`);
+        if (el) el.classList.toggle('active-view', v === viewName);
+      });
+      document.querySelectorAll('.mode-tab-btn').forEach(b => b.classList.remove('active'));
+      if (btnEl) btnEl.classList.add('active');
+    }
+
+    /********************************************************************
+     * 3. THREE.JS 3D ORBITAL PLANET & STARFIELD ENGINE
+     ********************************************************************/
     let scene, camera, renderer, earthMesh, wireMesh, haloMesh, orbitRing, satellitePivot, starField;
-    let globeRotationSpeed = 0.003;
+    let globeRotationSpeed = 0.0035;
     let isDraggingGlobe = false;
     let prevMouse = { x: 0, y: 0 };
 
     function initThreeGlobe() {
       const container = document.getElementById('threeCanvasContainer');
-      const width = container.clientWidth || 340;
-      const height = container.clientHeight || 270;
+      const width = container.clientWidth || 350;
+      const height = container.clientHeight || 285;
 
       scene = new THREE.Scene();
       camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-      camera.position.z = 4.6;
+      camera.position.z = 4.5;
 
       renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
       renderer.setSize(width, height);
@@ -430,46 +645,46 @@
       container.appendChild(renderer.domElement);
 
       earthMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(1.25, 20, 20),
-        new THREE.MeshPhongMaterial({ color: 0x0a192f, emissive: 0x041022, specular: 0x00f2fe, shininess: 25, transparent: true, opacity: 0.92 })
+        new THREE.SphereGeometry(1.25, 22, 22),
+        new THREE.MeshPhongMaterial({ color: 0x07142b, emissive: 0x030c1c, specular: 0x00f5d4, shininess: 30, transparent: true, opacity: 0.94 })
       );
       scene.add(earthMesh);
 
       wireMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(1.265, 14, 12),
-        new THREE.MeshBasicMaterial({ color: 0x00f2fe, wireframe: true, transparent: true, opacity: 0.35 })
+        new THREE.SphereGeometry(1.268, 16, 14),
+        new THREE.MeshBasicMaterial({ color: 0x00f5d4, wireframe: true, transparent: true, opacity: 0.36 })
       );
       earthMesh.add(wireMesh);
 
       haloMesh = new THREE.Mesh(
-        new THREE.SphereGeometry(1.42, 20, 20),
-        new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.12, side: THREE.BackSide })
+        new THREE.SphereGeometry(1.44, 20, 20),
+        new THREE.MeshBasicMaterial({ color: 0x00f5d4, transparent: true, opacity: 0.13, side: THREE.BackSide })
       );
       scene.add(haloMesh);
 
       orbitRing = new THREE.Mesh(
-        new THREE.RingGeometry(1.68, 1.71, 32),
-        new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+        new THREE.RingGeometry(1.68, 1.72, 40),
+        new THREE.MeshBasicMaterial({ color: 0x00bbf9, side: THREE.DoubleSide, transparent: true, opacity: 0.55 })
       );
-      orbitRing.rotation.x = Math.PI / 2.4;
+      orbitRing.rotation.x = Math.PI / 2.3;
       orbitRing.rotation.y = 0.35;
       scene.add(orbitRing);
 
       satellitePivot = new THREE.Object3D();
-      const satMesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.08, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+      const satMesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.085, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }));
       satMesh.position.set(1.7, 0, 0);
       satellitePivot.rotation.z = 0.4;
       satellitePivot.add(satMesh);
       scene.add(satellitePivot);
 
       const starGeo = new THREE.BufferGeometry();
-      const positions = new Float32Array(600 * 3);
-      for (let i = 0; i < 600 * 3; i++) positions[i] = (Math.random() - 0.5) * 18;
+      const positions = new Float32Array(700 * 3);
+      for (let i = 0; i < 700 * 3; i++) positions[i] = (Math.random() - 0.5) * 18;
       starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
       starField = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.025 }));
       scene.add(starField);
 
-      const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+      const dirLight = new THREE.DirectionalLight(0xffffff, 1.3);
       dirLight.position.set(5, 3, 5);
       scene.add(dirLight);
       scene.add(new THREE.AmbientLight(0x334155, 0.9));
@@ -490,8 +705,8 @@
     function animateThreeGlobe() {
       requestAnimationFrame(animateThreeGlobe);
       if (earthMesh && !isDraggingGlobe) earthMesh.rotation.y += globeRotationSpeed;
-      if (satellitePivot) satellitePivot.rotation.y -= globeRotationSpeed * 3.0;
-      if (starField) starField.rotation.y += 0.0002;
+      if (satellitePivot) satellitePivot.rotation.y -= globeRotationSpeed * 3.1;
+      if (starField) starField.rotation.y += 0.00025;
       if (renderer && scene && camera) renderer.render(scene, camera);
     }
 
@@ -501,11 +716,14 @@
       wireMesh.material.color.setHex(targetHex);
       haloMesh.material.color.setHex(targetHex);
       orbitRing.material.color.setHex(targetHex);
-      const scaleVal = 1 + (pitchNorm * 0.12);
+      const scaleVal = 1 + (pitchNorm * 0.13);
       earthMesh.scale.set(scaleVal, scaleVal, scaleVal);
-      globeRotationSpeed = isAnomaly ? 0.014 : (0.003 + pitchNorm * 0.005);
+      globeRotationSpeed = isAnomaly ? 0.015 : (0.0035 + pitchNorm * 0.005);
     }
 
+    /********************************************************************
+     * 4. 5-CHANNEL WEB AUDIO SYNTHESIZER & OSCILLOSCOPE ENGINE
+     ********************************************************************/
     let audioCtx = null, masterAnalyser = null, masterDelay = null, delayFeedback = null, noiseBuffer = null;
 
     function initAudioEngine() {
@@ -518,7 +736,7 @@
         masterDelay = audioCtx.createDelay(1.0);
         masterDelay.delayTime.value = 0.24;
         delayFeedback = audioCtx.createGain();
-        delayFeedback.gain.value = 0.28;
+        delayFeedback.gain.value = 0.3;
 
         masterDelay.connect(delayFeedback);
         delayFeedback.connect(masterDelay);
@@ -550,14 +768,25 @@
       const intensityNorm = rec.norm.intensity ?? 0.25;
       const prevPitch = prevRec.norm.pitch ?? 0.25;
       const deltaJump = Math.abs(pitchNorm - prevPitch);
-      const isAnomaly = deltaJump >= 0.12 || pitchNorm >= 0.85;
+      const isAnomaly = deltaJump >= 0.11 || pitchNorm >= 0.85;
 
       const scaleIdx = Math.min(SCALE_FREQS.length - 1, Math.floor(pitchNorm * SCALE_FREQS.length));
       const baseFreq = Math.round(SCALE_FREQS[scaleIdx] + (deltaJump * 150));
       const noteName = NOTE_NAMES[scaleIdx];
       const now = audioCtx.currentTime;
 
-      const leadVol = getSliderGain('vol-lead', 'lead') * (0.2 + pitchNorm * 0.25);
+      highlightActivePianoKey(scaleIdx);
+
+      // Highlight 16-Step Sequencer Playhead
+      const seqStep = index % 16;
+      document.querySelectorAll('.seq-cell').forEach(c => c.classList.remove('seq-playhead'));
+      for (let r = 0; r < 4; r++) {
+        const cell = document.getElementById(`seq-${r}-${seqStep}`);
+        if (cell) cell.classList.add('seq-playhead');
+      }
+
+      // CH1: Harmonic Lead
+      const leadVol = getSliderGain('vol-lead', 'lead') * (0.22 + pitchNorm * 0.25);
       if (leadVol > 0.001) {
         const oscLead = audioCtx.createOscillator();
         const gainLead = audioCtx.createGain();
@@ -573,15 +802,16 @@
         oscLead.stop(now + 0.75);
       }
 
+      // CH2: Sub-Bass
       const bassVol = getSliderGain('vol-bass', 'bass') * 0.28;
       if (bassVol > 0.001) {
         const oscBass = audioCtx.createOscillator();
         const gainBass = audioCtx.createGain();
         oscBass.type = 'sawtooth';
-        oscBass.frequency.setValueAtTime(Math.max(55, baseFreq * 0.25), now);
+        oscBass.frequency.setValueAtTime(Math.max(52, baseFreq * 0.25), now);
         const bassFilter = audioCtx.createBiquadFilter();
         bassFilter.type = 'lowpass';
-        bassFilter.frequency.setValueAtTime(200, now);
+        bassFilter.frequency.setValueAtTime(210, now);
         gainBass.gain.setValueAtTime(bassVol, now);
         gainBass.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
         oscBass.connect(bassFilter);
@@ -591,14 +821,15 @@
         oscBass.stop(now + 0.8);
       }
 
-      const noiseVol = getSliderGain('vol-noise', 'noise') * (0.1 + intensityNorm * 0.22);
+      // CH3: Weather Noise
+      const noiseVol = getSliderGain('vol-noise', 'noise') * (0.1 + intensityNorm * 0.24);
       if (ambienceActive && noiseVol > 0.001 && noiseBuffer) {
         const noiseSrc = audioCtx.createBufferSource();
         noiseSrc.buffer = noiseBuffer;
         const filter = audioCtx.createBiquadFilter();
         const gainNoise = audioCtx.createGain();
         filter.type = activeTrack === 'rain' ? 'bandpass' : 'lowpass';
-        filter.frequency.setValueAtTime(1400, now);
+        filter.frequency.setValueAtTime(1350, now);
         gainNoise.gain.setValueAtTime(0.001, now);
         gainNoise.gain.linearRampToValueAtTime(noiseVol, now + 0.05);
         gainNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
@@ -609,33 +840,35 @@
         noiseSrc.stop(now + 0.8);
       }
 
-      const percVol = getSliderGain('vol-perc', 'perc') * 0.3;
+      // CH4: 808 Kick
+      const percVol = getSliderGain('vol-perc', 'perc') * 0.32;
       if (percVol > 0.001) {
         const kickOsc = audioCtx.createOscillator();
         const kickGain = audioCtx.createGain();
         kickOsc.type = 'sine';
-        kickOsc.frequency.setValueAtTime(130, now);
-        kickOsc.frequency.exponentialRampToValueAtTime(35, now + 0.15);
+        kickOsc.frequency.setValueAtTime(135, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(34, now + 0.16);
         kickGain.gain.setValueAtTime(percVol, now);
-        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
         kickOsc.connect(kickGain);
         kickGain.connect(masterAnalyser);
         kickOsc.start(now);
-        kickOsc.stop(now + 0.2);
+        kickOsc.stop(now + 0.22);
       }
 
-      const sirenVol = getSliderGain('vol-siren', 'siren') * 0.3;
+      // CH5: Anomaly Siren
+      const sirenVol = getSliderGain('vol-siren', 'siren') * 0.32;
       if (isAnomaly && sirenVol > 0.001) {
         const arpOsc = audioCtx.createOscillator();
         const arpGain = audioCtx.createGain();
         arpOsc.type = 'triangle';
         arpOsc.frequency.setValueAtTime(baseFreq * 1.5, now);
         arpGain.gain.setValueAtTime(sirenVol, now);
-        arpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        arpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
         arpOsc.connect(arpGain);
         arpGain.connect(masterDelay);
         arpOsc.start(now);
-        arpOsc.stop(now + 0.3);
+        arpOsc.stop(now + 0.32);
       }
 
       if (voiceSynthActive && 'speechSynthesis' in window) {
@@ -659,15 +892,15 @@
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = type === 'siren' ? 'sawtooth' : 'sine';
-      osc.frequency.setValueAtTime(type === 'subdrop' ? 150 : 880, now);
-      osc.frequency.exponentialRampToValueAtTime(type === 'subdrop' ? 30 : 220, now + 0.45);
-      gain.gain.setValueAtTime(0.35, now);
+      osc.frequency.setValueAtTime(type === 'subdrop' ? 150 : 920, now);
+      osc.frequency.exponentialRampToValueAtTime(type === 'subdrop' ? 28 : 220, now + 0.45);
+      gain.gain.setValueAtTime(0.38, now);
       gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
       osc.connect(gain);
       gain.connect(masterDelay);
       osc.start(now);
       osc.stop(now + 0.5);
-      appendLog(`[PAD FX] Triggered ${type.toUpperCase()} telemetry pulse.`);
+      appendLog(`[META BEATS FX] Triggered ${type.toUpperCase()} acoustic pad.`);
     }
 
     function drawRealTimeOscilloscope() {
@@ -682,10 +915,10 @@
         masterAnalyser.getByteFrequencyData(freqData);
         masterAnalyser.getByteTimeDomainData(timeData);
 
-        ctx.fillStyle = 'rgba(3, 7, 18, 0.42)';
+        ctx.fillStyle = 'rgba(2, 5, 14, 0.42)';
         ctx.fillRect(0, 0, width, height);
 
-        const barCount = 28;
+        const barCount = 30;
         const barWidth = (width / barCount) - 2;
         let peakSum = 0;
 
@@ -694,7 +927,7 @@
           peakSum += val;
           const pct = val / 255;
           const barH = pct * (height - 8);
-          ctx.fillStyle = pct > 0.65 ? '#ff2a5f' : '#00f2fe';
+          ctx.fillStyle = pct > 0.65 ? '#ff2a5f' : (activeTrack === 'rain' ? '#00f5d4' : activeTrack === 'ocean' ? '#38bdf8' : '#f15bb5');
           ctx.fillRect(i * (barWidth + 2), height - barH, barWidth, barH);
         }
 
@@ -718,49 +951,45 @@
       renderFrame();
     }
 
+    /********************************************************************
+     * 5. TRACK SWITCHER, CHART.JS & FULL TELEMETRY SYNCHRONIZATION
+     ********************************************************************/
     async function switchTrack(trackName) {
       stopMasterAudio();
       activeTrack = trackName;
+      document.body.setAttribute('data-track', trackName);
 
-      const root = document.documentElement;
-      let hexTheme = 0x00f2fe;
+      let hexTheme = 0x00f5d4;
       if (trackName === 'rain') {
-        root.style.setProperty('--theme', '#00f2fe');
-        root.style.setProperty('--theme-alt', '#3b82f6');
-        hexTheme = 0x00f2fe;
-        document.getElementById('turntableTrackName').innerText = 'DISC 01: MONSOON EXTREMES';
+        hexTheme = 0x00f5d4;
+        document.getElementById('turntableTrackName').innerText = 'META BEATS // DISC 01: MONSOON';
       } else if (trackName === 'ocean') {
-        root.style.setProperty('--theme', '#38bdf8');
-        root.style.setProperty('--theme-alt', '#0284c7');
         hexTheme = 0x38bdf8;
-        document.getElementById('turntableTrackName').innerText = 'DISC 02: INDIAN OCEAN SWELL';
+        document.getElementById('turntableTrackName').innerText = 'META BEATS // DISC 02: OCEAN SWELL';
       } else {
-        root.style.setProperty('--theme', '#c084fc');
-        root.style.setProperty('--theme-alt', '#9333ea');
-        hexTheme = 0xc084fc;
-        document.getElementById('turntableTrackName').innerText = 'DISC 03: POLAR ICE MASS LOSS';
+        hexTheme = 0xf15bb5;
+        document.getElementById('turntableTrackName').innerText = 'META BEATS // DISC 03: CRYO LOSS';
       }
 
       ['rain', 'ocean', 'glacier'].forEach(id => {
-        document.getElementById('card-' + id).className = (id === trackName) ? 'track-card active' : 'track-card';
+        document.getElementById('card-' + id).className = (id === trackName) ? 'holo-disc-card active' : 'holo-disc-card';
       });
 
       try {
         const res = await fetch(`/data/${trackName}`);
         if (!res.ok) throw new Error('Fallback');
         const loaded = await res.json();
-        currentData = { ...FALLBACK_ARCHIVE[trackName], ...loaded };
-        document.getElementById('ribbonArchive').innerText = '2-BACKEND / 3-MEMORY LIVE';
+        currentData = (loaded.records && loaded.records.length >= 15) ? loaded : FALLBACK_ARCHIVE[trackName];
+        document.getElementById('topArchiveSync').innerText = '2-BACKEND / 3-MEMORY LIVE';
       } catch (err) {
         currentData = FALLBACK_ARCHIVE[trackName];
-        document.getElementById('ribbonArchive').innerText = '3-MEMORY EMBEDDED SYNC';
+        document.getElementById('topArchiveSync').innerText = '3-MEMORY 20-EPOCH SYNC';
       }
 
       currentIndex = 0;
-      document.getElementById('missionSourceText').innerText = `SOURCE: ${currentData.source}`;
+      document.getElementById('missionSourceText').innerText = `MISSION ARCHIVE: ${currentData.source}`;
       document.getElementById('orbitCoords').innerText = currentData.coords;
-      document.getElementById('ribbonSat').innerText = currentData.satellite || 'NASA EOS';
-      document.getElementById('ribbonRes').innerText = `${currentData.records.length} HISTORICAL EPOCHS`;
+      document.getElementById('topSatName').innerText = currentData.satellite || 'NASA EOS';
       document.getElementById('kpiLabelPrimary').innerText = currentData.unitPrimary;
       document.getElementById('kpiLabelSecondary').innerText = currentData.unitSecondary;
       document.getElementById('thPrimary').innerText = currentData.unitPrimary;
@@ -774,14 +1003,14 @@
       buildDataChart();
       populateArchiveTable();
       updateGlobeColorAndPulse(hexTheme, false, 0.2);
-      syncAllVisuals(0, 220, 'A3', 0, false);
+      syncAllVisuals(0, 131, 'C3', 0, false);
     }
 
     function buildDataChart() {
       const ctx = document.getElementById('mainTelemetryChart').getContext('2d');
       if (chartObj) chartObj.destroy();
 
-      const colorHex = activeTrack === 'rain' ? '#00f2fe' : activeTrack === 'ocean' ? '#38bdf8' : '#c084fc';
+      const colorHex = activeTrack === 'rain' ? '#00f5d4' : activeTrack === 'ocean' ? '#38bdf8' : '#f15bb5';
 
       chartObj = new Chart(ctx, {
         type: 'line',
@@ -791,11 +1020,12 @@
             label: `${currentData.title} (${currentData.unitPrimary})`,
             data: currentData.records.map(r => r.raw.primary),
             borderColor: colorHex,
-            backgroundColor: 'rgba(0, 242, 254, 0.1)',
+            backgroundColor: 'rgba(0, 245, 212, 0.1)',
             fill: true,
             borderWidth: 2.5,
-            tension: 0.3,
-            pointRadius: 4
+            tension: 0.32,
+            pointRadius: 4,
+            pointHoverRadius: 8
           }]
         },
         options: {
@@ -807,8 +1037,8 @@
           },
           plugins: { legend: { labels: { color: '#f8fafc', font: { family: 'Orbitron', size: 10 } } } },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
-            y: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
+            x: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 9.5 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 9.5 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
           }
         }
       });
@@ -842,9 +1072,10 @@
       document.getElementById('kpiValPrimary').innerText = rec.raw.primary;
       document.getElementById('kpiValSecondary').innerText = rec.raw.secondary;
       document.getElementById('kpiValFreq').innerText = `${freqHz} Hz`;
-      document.getElementById('kpiSubNote').innerText = `Note: ${noteName}`;
+      document.getElementById('kpiSubNote').innerText = `Musical Note: ${noteName}`;
       document.getElementById('kpiValDelta').innerText = index === 0 ? 'BASELINE' : `${rawDiff > 0 ? '+' : ''}${rawDiff}`;
       document.getElementById('explanationBannerText').innerText = rec.explanation;
+
       const stepNum = String(index + 1).padStart(2, '0');
       const totalNum = String(currentData.records.length).padStart(2, '0');
       document.getElementById('stepProgressText').innerText = `STEP ${stepNum} / ${totalNum} (YEAR ${rec.date})`;
@@ -854,19 +1085,19 @@
       const pillEl = document.getElementById('anomalyStatusPill');
       if (isAnomaly) {
         consoleEl.classList.add('alert-active');
-        pillEl.className = 'status-pill critical';
+        pillEl.className = 'anomaly-badge-pill critical';
         pillEl.innerText = '⚠️ ANOMALY SPIKE';
         document.getElementById('orbitStatus').innerText = 'ORBIT: ANOMALY';
         appendLog(`[ANOMALY ${rec.date}] Value ${rec.raw.primary} ➔ Boosted to ${freqHz} Hz (${noteName})`, true);
       } else {
         consoleEl.classList.remove('alert-active');
-        pillEl.className = 'status-pill';
+        pillEl.className = 'anomaly-badge-pill';
         pillEl.innerText = 'TELEMETRY NOMINAL';
         document.getElementById('orbitStatus').innerText = 'ORBIT: NOMINAL';
         appendLog(`[EPOCH ${rec.date}] Primary: ${rec.raw.primary} | Synth: ${freqHz} Hz (${noteName})`);
       }
 
-      const baseHex = activeTrack === 'rain' ? 0x00f2fe : activeTrack === 'ocean' ? 0x38bdf8 : 0xc084fc;
+      const baseHex = activeTrack === 'rain' ? 0x00f5d4 : activeTrack === 'ocean' ? 0x38bdf8 : 0xf15bb5;
       updateGlobeColorAndPulse(baseHex, isAnomaly, rec.norm.pitch || 0.3);
 
       currentData.records.forEach((_, i) => {
@@ -875,6 +1106,9 @@
       });
     }
 
+    /********************************************************************
+     * 6. TRANSPORT CONTROLS & EXPORT UTILITIES
+     ********************************************************************/
     function toggleMasterPlay() {
       const btn = document.getElementById('masterPlayBtn');
       const vinyl = document.getElementById('vinylDisc');
@@ -888,7 +1122,7 @@
         vinyl.classList.add('spinning');
         btn.innerText = '⏸ PAUSE SONIFICATION';
         executeStep();
-        playTimer = setInterval(executeStep, 1400 / playbackSpeed);
+        playTimer = setInterval(executeStep, 1350 / playbackSpeed);
       }
     }
 
@@ -902,9 +1136,9 @@
       isPlaying = false;
       currentIndex = 0;
       document.getElementById('vinylDisc').classList.remove('spinning');
-      document.getElementById('masterPlayBtn').innerText = '▶ PLAY MASTER SONIFICATION';
+      document.getElementById('masterPlayBtn').innerText = '▶ LAUNCH MASTER SONIFICATION';
       if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      if (currentData) syncAllVisuals(0, 220, 'A3', 0, false);
+      if (currentData) syncAllVisuals(0, 131, 'C3', 0, false);
     }
 
     function scrubTimeline(idx) {
@@ -926,11 +1160,11 @@
       playbackSpeed = s;
       [0.5, 1, 1.5, 2].forEach(val => {
         const el = document.getElementById('speed-' + val);
-        if (el) el.className = (val === s) ? 'cyber-btn active' : 'cyber-btn';
+        if (el) el.className = (val === s) ? 'holo-btn active' : 'holo-btn';
       });
       if (isPlaying) {
         clearInterval(playTimer);
-        playTimer = setInterval(executeStep, 1400 / playbackSpeed);
+        playTimer = setInterval(executeStep, 1350 / playbackSpeed);
       }
     }
 
@@ -938,43 +1172,61 @@
       channelMutes[ch] = !channelMutes[ch];
       const btn = document.getElementById('mute-' + ch);
       btn.innerText = channelMutes[ch] ? 'MUTED' : 'ON';
-      btn.className = channelMutes[ch] ? 'mute-toggle muted' : 'mute-toggle';
+      btn.className = channelMutes[ch] ? 'dsp-mute-btn muted' : 'dsp-mute-btn';
     }
 
     function toggleVoiceSynth() {
       voiceSynthActive = !voiceSynthActive;
       const btn = document.getElementById('voiceBtn');
       btn.innerText = voiceSynthActive ? '🔊 AI Voice: ON' : '🔊 AI Voice: OFF';
-      btn.className = voiceSynthActive ? 'cyber-btn active' : 'cyber-btn';
+      btn.className = voiceSynthActive ? 'holo-btn active' : 'holo-btn';
     }
 
     function toggleAmbience() {
       ambienceActive = !ambienceActive;
       const btn = document.getElementById('ambienceBtn');
       btn.innerText = ambienceActive ? '🌧️ Ambience: ON' : '🌧️ Ambience: OFF';
-      btn.className = ambienceActive ? 'cyber-btn active' : 'cyber-btn';
+      btn.className = ambienceActive ? 'holo-btn active' : 'holo-btn';
     }
 
-    function toggleScanlines() { document.body.classList.toggle('no-scanlines'); }
-    function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
+    function toggleHighContrast() {
+      document.body.classList.toggle('high-contrast');
+    }
+
+    function exportActiveTelemetryJSON() {
+      if (!currentData) return;
+      const blob = new Blob([JSON.stringify(currentData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `meta-beats-nasa-${activeTrack}-20epochs.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      appendLog(`[EXPORT] Downloaded meta-beats-nasa-${activeTrack}-20epochs.json`);
+    }
 
     function appendLog(msg, isAlert = false) {
       const box = document.getElementById('terminalLogBox');
       if (!box) return;
       const div = document.createElement('div');
-      div.className = isAlert ? 'log-entry alert' : 'log-entry';
+      div.className = isAlert ? 'terminal-line alert' : 'terminal-line';
       div.innerText = msg;
       box.prepend(div);
-      while (box.children.length > 20) { box.removeChild(box.lastChild); }
+      while (box.children.length > 22) box.removeChild(box.lastChild);
     }
 
     setInterval(() => {
-      document.getElementById('liveClockDisplay').innerText = `UTC TELEMETRY: ${new Date().toUTCString().toUpperCase()}`;
+      document.getElementById('liveClockDisplay').innerText = `UTC: ${new Date().toUTCString().toUpperCase()}`;
     }, 1000);
 
     window.addEventListener('DOMContentLoaded', () => {
+      buildPianoKeyboard();
+      buildSequencerGrid();
       initThreeGlobe();
       switchTrack('rain');
+      setTimeout(() => {
+        document.getElementById('bootScreen').classList.add('hidden');
+      }, 1500);
     });
   </script>
 </body>
