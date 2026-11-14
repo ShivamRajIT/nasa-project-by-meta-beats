@@ -1187,6 +1187,18 @@ table.quantum-table tr.active-row td {
   color: #fff;
   font-weight: 800;
 }
+.meta-team-grid-6 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 14px;
+}
+@media (max-width: 980px) {
+  .meta-team-grid-6 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .meta-team-grid-6 { grid-template-columns: 1fr; }
+}
 
 .dsp-terminal-box {
   background: #02040a;
