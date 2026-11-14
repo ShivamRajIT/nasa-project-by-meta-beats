@@ -1,16 +1,26 @@
 {
   "datasetId": "glacier",
   "title": "Antarctica & Greenland Polar Ice Mass Loss (2002–2025)",
-  "source": "NASA GRACE & GRACE-FO Satellite Gravimetry Mission",
-  "unitPrimary": "Gigatonnes (Gt Ice Mass)",
+  "source": "NASA GRACE & GRACE-FO Satellite Gravimetry & ICESat-2",
+  "coords": "LAT: 75.00° S | LON: 105.00° W (AMUNDSEN SEA / THWAITES SECTOR)",
+  "satellite": "GRACE-FO Twin Satellites / ICESat-2 Laser Altimeter",
+  "unitPrimary": "Gigatonnes (Gt Ice Loss)",
   "unitSecondary": "Gt/yr (Melt Acceleration)",
   "records": [
-    { "index": 0, "date": "2002", "raw": { "primary": 0, "secondary": 85 }, "norm": { "pitch": 0.15, "intensity": 0.15 }, "explanation": "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
-    { "index": 1, "date": "2005", "raw": { "primary": -410, "secondary": 115 }, "norm": { "pitch": 0.28, "intensity": 0.28 }, "explanation": "2005 (-410 Gt lost): Initial ice shelf thinning raises tension pitch slightly." },
-    { "index": 2, "date": "2008", "raw": { "primary": -890, "secondary": 148 }, "norm": { "pitch": 0.42, "intensity": 0.42 }, "explanation": "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
-    { "index": 3, "date": "2012", "raw": { "primary": -1540, "secondary": 195 }, "norm": { "pitch": 0.60, "intensity": 0.62 }, "explanation": "2012 Extreme Melt Year (-1,540 Gt): Sharp 650 Gt drop triggers high-delta alarm harmonic!" },
-    { "index": 4, "date": "2016", "raw": { "primary": -2110, "secondary": 215 }, "norm": { "pitch": 0.74, "intensity": 0.75 }, "explanation": "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
-    { "index": 5, "date": "2020", "raw": { "primary": -2680, "secondary": 255 }, "norm": { "pitch": 0.88, "intensity": 0.88 }, "explanation": "2020 GRACE-FO Record (-2,680 Gt): Rapid West Antarctic grounding line retreat." },
-    { "index": 6, "date": "2025", "raw": { "primary": -3290, "secondary": 290 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Cumulative Loss (-3,290 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
+    { "index": 0, "date": "2002", "raw": { "primary": 0, "secondary": 85 }, "norm": { "pitch": 0.12, "intensity": 0.14 }, "explanation": "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
+    { "index": 1, "date": "2004", "raw": { "primary": -240, "secondary": 98 }, "norm": { "pitch": 0.20, "intensity": 0.21 }, "explanation": "2004 (-240 Gt): Early gravimetric detection of Jakobshavn & Pine Island thinning." },
+    { "index": 2, "date": "2005", "raw": { "primary": -410, "secondary": 115 }, "norm": { "pitch": 0.28, "intensity": 0.28 }, "explanation": "2005 (-410 Gt lost): Initial ice shelf basal melt raises tension pitch." },
+    { "index": 3, "date": "2007", "raw": { "primary": -680, "secondary": 134 }, "norm": { "pitch": 0.35, "intensity": 0.36 }, "explanation": "2007 Arctic Summer Minimum: Surface meltwater lakes accelerate glacier slip." },
+    { "index": 4, "date": "2008", "raw": { "primary": -890, "secondary": 148 }, "norm": { "pitch": 0.42, "intensity": 0.42 }, "explanation": "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
+    { "index": 5, "date": "2010", "raw": { "primary": -1190, "secondary": 172 }, "norm": { "pitch": 0.51, "intensity": 0.52 }, "explanation": "2010 (-1,190 Gt): Cumulative polar mass loss crosses 1 trillion metric tonnes." },
+    { "index": 6, "date": "2012", "raw": { "primary": -1540, "secondary": 195 }, "norm": { "pitch": 0.62, "intensity": 0.64 }, "explanation": "2012 Extreme Melt Year (-1,540 Gt): 97% Greenland surface melt triggers high-delta alarm!" },
+    { "index": 7, "date": "2014", "raw": { "primary": -1820, "secondary": 204 }, "norm": { "pitch": 0.68, "intensity": 0.70 }, "explanation": "2014 (-1,820 Gt): Warm circumpolar deep water erodes West Antarctic grounding lines." },
+    { "index": 8, "date": "2016", "raw": { "primary": -2110, "secondary": 215 }, "norm": { "pitch": 0.74, "intensity": 0.75 }, "explanation": "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
+    { "index": 9, "date": "2018", "raw": { "primary": -2390, "secondary": 232 }, "norm": { "pitch": 0.81, "intensity": 0.82 }, "explanation": "2018 GRACE-FO & ICESat-2 Launch: Laser altimetry maps steepening glacier calving fronts." },
+    { "index": 10, "date": "2019", "raw": { "primary": -2540, "secondary": 248 }, "norm": { "pitch": 0.85, "intensity": 0.86 }, "explanation": "2019 Atmospheric Blocking Event: Extreme Greenland mass balance deficit." },
+    { "index": 11, "date": "2020", "raw": { "primary": -2680, "secondary": 255 }, "norm": { "pitch": 0.88, "intensity": 0.88 }, "explanation": "2020 GRACE-FO Record (-2,680 Gt): Rapid Thwaites & Pine Island ice shelf retreat." },
+    { "index": 12, "date": "2022", "raw": { "primary": -2940, "secondary": 271 }, "norm": { "pitch": 0.93, "intensity": 0.93 }, "explanation": "2022 Late-Season Heatwave (-2,940 Gt): High-elevation melt events recorded." },
+    { "index": 13, "date": "2024", "raw": { "primary": -3150, "secondary": 282 }, "norm": { "pitch": 0.97, "intensity": 0.97 }, "explanation": "2024 (-3,150 Gt): Over 3.1 trillion tonnes lost since 2002 baseline." },
+    { "index": 14, "date": "2025", "raw": { "primary": -3340, "secondary": 295 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Cumulative Loss (-3,340 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
   ]
 }

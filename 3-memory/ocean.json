@@ -1,17 +1,26 @@
 {
   "datasetId": "ocean",
   "title": "Indian Ocean Thermal Expansion & Swell (1993–2025)",
-  "source": "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason Altimetry",
+  "source": "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason-3/Sentinel-6 Altimetry",
+  "coords": "LAT: 08.40° N | LON: 73.10° E (ARABIAN SEA / EQUATORIAL INDIAN OCEAN)",
+  "satellite": "Jason-3 / MODIS Aqua / Sentinel-6 Michael Freilich",
   "unitPrimary": "°C (Sea Surface)",
   "unitSecondary": "mm (Sea Level Rise)",
   "records": [
-    { "index": 0, "date": "1993", "raw": { "primary": 26.8, "secondary": 0.0 }, "norm": { "pitch": 0.12, "intensity": 0.15 }, "explanation": "1993 TOPEX Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
-    { "index": 1, "date": "1997", "raw": { "primary": 27.3, "secondary": 14.2 }, "norm": { "pitch": 0.28, "intensity": 0.30 }, "explanation": "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
-    { "index": 2, "date": "2001", "raw": { "primary": 27.5, "secondary": 26.8 }, "norm": { "pitch": 0.36, "intensity": 0.38 }, "explanation": "2001: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
-    { "index": 3, "date": "2005", "raw": { "primary": 27.9, "secondary": 41.0 }, "norm": { "pitch": 0.50, "intensity": 0.50 }, "explanation": "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
-    { "index": 4, "date": "2010", "raw": { "primary": 28.4, "secondary": 58.5 }, "norm": { "pitch": 0.66, "intensity": 0.65 }, "explanation": "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
-    { "index": 5, "date": "2016", "raw": { "primary": 29.1, "secondary": 79.2 }, "norm": { "pitch": 0.84, "intensity": 0.82 }, "explanation": "2016 Coral Bleaching Peak: +0.7°C sudden jump! Sharp pitch rise and heavy vibrato." },
-    { "index": 6, "date": "2020", "raw": { "primary": 29.4, "secondary": 94.0 }, "norm": { "pitch": 0.92, "intensity": 0.90 }, "explanation": "2020: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
-    { "index": 7, "date": "2025", "raw": { "primary": 29.9, "secondary": 111.5 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Critical Thermal High: 29.9°C & +111.5mm rise. Peak frequency & maximum wave pulse." }
+    { "index": 0, "date": "1993", "raw": { "primary": 26.8, "secondary": 0.0 }, "norm": { "pitch": 0.12, "intensity": 0.15 }, "explanation": "1993 TOPEX/Poseidon Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
+    { "index": 1, "date": "1995", "raw": { "primary": 27.0, "secondary": 6.4 }, "norm": { "pitch": 0.19, "intensity": 0.21 }, "explanation": "1995: Early altimetry tracks +6.4mm steric sea level expansion." },
+    { "index": 2, "date": "1997", "raw": { "primary": 27.3, "secondary": 14.2 }, "norm": { "pitch": 0.28, "intensity": 0.30 }, "explanation": "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
+    { "index": 3, "date": "1999", "raw": { "primary": 27.4, "secondary": 20.1 }, "norm": { "pitch": 0.32, "intensity": 0.34 }, "explanation": "1999 La Niña Rebound: Subsurface heat uptake continues steady upward trend." },
+    { "index": 4, "date": "2001", "raw": { "primary": 27.5, "secondary": 26.8 }, "norm": { "pitch": 0.36, "intensity": 0.38 }, "explanation": "2001 Jason-1 Calibration: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
+    { "index": 5, "date": "2003", "raw": { "primary": 27.7, "secondary": 33.5 }, "norm": { "pitch": 0.43, "intensity": 0.44 }, "explanation": "2003 MODIS Aqua Era: High-resolution IR radiometry confirms basin-wide warming." },
+    { "index": 6, "date": "2005", "raw": { "primary": 27.9, "secondary": 41.0 }, "norm": { "pitch": 0.50, "intensity": 0.50 }, "explanation": "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
+    { "index": 7, "date": "2008", "raw": { "primary": 28.1, "secondary": 49.4 }, "norm": { "pitch": 0.58, "intensity": 0.57 }, "explanation": "2008 OSTM/Jason-2 Launch: Sea level crosses +49mm above 1993 reference ellipsoid." },
+    { "index": 8, "date": "2010", "raw": { "primary": 28.4, "secondary": 58.5 }, "norm": { "pitch": 0.66, "intensity": 0.65 }, "explanation": "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
+    { "index": 9, "date": "2013", "raw": { "primary": 28.6, "secondary": 67.8 }, "norm": { "pitch": 0.73, "intensity": 0.72 }, "explanation": "2013: Accelerated thermosteric expansion in the Arabian Sea basin." },
+    { "index": 10, "date": "2016", "raw": { "primary": 29.1, "secondary": 79.2 }, "norm": { "pitch": 0.84, "intensity": 0.82 }, "explanation": "2016 Coral Bleaching Peak: +0.5°C jump! Sharp pitch rise and heavy vibrato." },
+    { "index": 11, "date": "2018", "raw": { "primary": 29.2, "secondary": 86.5 }, "norm": { "pitch": 0.88, "intensity": 0.86 }, "explanation": "2018 Cyclone Intensification: High ocean heat content fuels rapid storm spin-up." },
+    { "index": 12, "date": "2020", "raw": { "primary": 29.4, "secondary": 94.0 }, "norm": { "pitch": 0.92, "intensity": 0.90 }, "explanation": "2020 Sentinel-6 Era: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
+    { "index": 13, "date": "2023", "raw": { "primary": 29.7, "secondary": 103.8 }, "norm": { "pitch": 0.96, "intensity": 0.96 }, "explanation": "2023 Global SST Anomaly: Exceeds 100mm cumulative regional sea-level rise." },
+    { "index": 14, "date": "2025", "raw": { "primary": 29.9, "secondary": 112.4 }, "norm": { "pitch": 1.00, "intensity": 1.00 }, "explanation": "2025 Critical Thermal High: 29.9°C & +112.4mm rise. Peak frequency & maximum wave pulse." }
   ]
 }

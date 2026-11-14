@@ -4,813 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NASA EARTH JUKEBOX PRO — 3D WebGL Telemetry & Multi-Synth Studio</title>
-  <!-- External Engines: Three.js (3D WebGL), Chart.js (Graphs), Lucide Icons -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --theme: #00f2fe;
-      --theme-alt: #3b82f6;
-      --theme-glow: rgba(0, 242, 254, 0.45);
-      --theme-soft: rgba(0, 242, 254, 0.12);
-      --danger: #ff2a5f;
-      --danger-glow: rgba(255, 42, 95, 0.6);
-      --warn: #f59e0b;
-      --success: #10b981;
-      --bg-deep: #02040a;
-      --bg-panel: rgba(9, 14, 28, 0.78);
-      --bg-card: rgba(15, 23, 42, 0.65);
-      --border-glass: rgba(255, 255, 255, 0.12);
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
-    body.high-contrast {
-      --theme: #ffff00 !important;
-      --theme-alt: #ff9900 !important;
-      --theme-glow: rgba(255, 255, 0, 0.85) !important;
-      --theme-soft: rgba(255, 255, 0, 0.2) !important;
-      --bg-deep: #000000 !important;
-      --bg-panel: #050505 !important;
-      --bg-card: #0a0a0a !important;
-      --border-glass: #ffff00 !important;
-      --text-main: #ffffff !important;
-      --text-muted: #ffff00 !important;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-    }
-
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #02040a; }
-    ::-webkit-scrollbar-thumb { background: var(--theme); border-radius: 4px; }
-
-    body {
-      background-color: var(--bg-deep);
-      color: var(--text-main);
-      font-family: 'Inter', system-ui, sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    /* Animated Cyber Grid Floor */
-    .cyber-grid-bg {
-      position: fixed;
-      inset: 0;
-      background-image: 
-        linear-gradient(to right, rgba(0, 242, 254, 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(0, 242, 254, 0.04) 1px, transparent 1px);
-      background-size: 45px 45px;
-      z-index: -2;
-      pointer-events: none;
-    }
-
-    .radial-vignette {
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(circle at 50% 20%, transparent 10%, #02040a 90%);
-      z-index: -1;
-      pointer-events: none;
-    }
-
-    /* Optional CRT Scanlines Overlay */
-    .scanlines {
-      position: fixed;
-      inset: 0;
-      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
-      background-size: 100% 4px;
-      z-index: 999;
-      pointer-events: none;
-      opacity: 0.35;
-      transition: opacity 0.3s ease;
-    }
-    body.no-scanlines .scanlines { opacity: 0; }
-
-    /* Master Layout Container */
-    .app-shell {
-      max-width: 1480px;
-      margin: 0 auto;
-      padding: 18px 24px 40px 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 18px;
-    }
-
-    /* Top Telemetry Ticker Bar */
-    .top-ticker {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 16px;
-      background: rgba(5, 10, 24, 0.9);
-      border: 1px solid var(--border-glass);
-      border-radius: 10px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--text-muted);
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .status-dot {
-      display: inline-block;
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 10px var(--success);
-      margin-right: 6px;
-      animation: pulseDot 1.5s infinite;
-    }
-    @keyframes pulseDot {
-      0%, 100% { transform: scale(1); opacity: 1; }
-      50% { transform: scale(1.35); opacity: 0.6; }
-    }
-
-    /* Main Header Bar */
-    .hud-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-      padding: 18px 24px;
-      background: var(--bg-panel);
-      border: 1px solid var(--border-glass);
-      border-radius: 18px;
-      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 25px var(--theme-soft);
-      backdrop-filter: blur(16px);
-      position: relative;
-      overflow: hidden;
-    }
-    .hud-header::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, transparent, var(--theme), var(--theme-alt), transparent);
-    }
-
-    .brand-cluster {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .nasa-emblem {
-      width: 58px;
-      height: 58px;
-      border-radius: 14px;
-      background: radial-gradient(circle at 30% 30%, #2563eb, #0f172a 70%);
-      border: 2px solid var(--theme);
-      box-shadow: 0 0 20px var(--theme-glow);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-family: 'Orbitron', sans-serif;
-      font-weight: 900;
-      font-size: 13px;
-      letter-spacing: 1px;
-      color: #fff;
-      position: relative;
-    }
-    .nasa-emblem span {
-      font-size: 8px;
-      color: var(--theme);
-      letter-spacing: 2px;
-    }
-
-    .title-block h1 {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 24px;
-      font-weight: 900;
-      letter-spacing: 1.5px;
-      color: #ffffff;
-      text-shadow: 0 0 15px var(--theme-glow);
-      margin: 0;
-    }
-    .title-block p {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--theme);
-      margin-top: 4px;
-    }
-
-    .header-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .cyber-btn {
-      padding: 10px 16px;
-      border-radius: 10px;
-      border: 1px solid var(--border-glass);
-      background: rgba(15, 23, 42, 0.85);
-      color: var(--text-main);
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .cyber-btn:hover {
-      border-color: var(--theme);
-      box-shadow: 0 0 15px var(--theme-glow);
-      transform: translateY(-2px);
-    }
-    .cyber-btn.active {
-      background: var(--theme);
-      color: #020617;
-      border-color: var(--theme);
-      box-shadow: 0 0 20px var(--theme-glow);
-    }
-    .cyber-btn.danger-btn {
-      border-color: var(--danger);
-      color: #fda4af;
-    }
-
-    /* 3-Track Jukebox Selector Deck */
-    .track-selector-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
-    }
-    @media (max-width: 980px) {
-      .track-selector-grid { grid-template-columns: 1fr; }
-    }
-
-    .track-card {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-glass);
-      border-radius: 16px;
-      padding: 16px 20px;
-      cursor: pointer;
-      position: relative;
-      overflow: hidden;
-      transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-      transform-style: preserve-3d;
-    }
-    .track-card:hover {
-      border-color: var(--theme);
-      transform: translateY(-4px) scale(1.01);
-      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5), 0 0 20px var(--theme-soft);
-    }
-    .track-card.active {
-      background: linear-gradient(135deg, rgba(0, 242, 254, 0.16), rgba(15, 23, 42, 0.92));
-      border: 2px solid var(--theme);
-      box-shadow: 0 0 30px var(--theme-glow);
-    }
-    .track-info {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .track-badge {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 800;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--theme);
-    }
-    .track-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 16px;
-      font-weight: 800;
-      color: #fff;
-    }
-    .track-desc {
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .track-icon-orb {
-      width: 48px;
-      height: 48px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--border-glass);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-
-    /* Main 3-Column Studio Cockpit */
-    .cockpit-grid {
-      display: grid;
-      grid-template-columns: 380px 1fr 340px;
-      gap: 18px;
-      align-items: stretch;
-    }
-    @media (max-width: 1280px) {
-      .cockpit-grid { grid-template-columns: 350px 1fr; }
-      .cockpit-right { grid-column: span 2; }
-    }
-    @media (max-width: 860px) {
-      .cockpit-grid { grid-template-columns: 1fr; }
-      .cockpit-right { grid-column: span 1; }
-    }
-
-    .glass-panel {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-glass);
-      border-radius: 18px;
-      padding: 18px;
-      backdrop-filter: blur(14px);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .panel-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-      padding-bottom: 10px;
-    }
-    .panel-title {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 13px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      color: var(--theme);
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .panel-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.06);
-      color: var(--text-muted);
-    }
-
-    /* 3D WebGL Globe Viewport */
-    .globe-viewport {
-      width: 100%;
-      height: 270px;
-      border-radius: 14px;
-      background: radial-gradient(circle at center, #0a192f 0%, #02040a 100%);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      position: relative;
-      overflow: hidden;
-      cursor: grab;
-    }
-    .globe-viewport:active { cursor: grabbing; }
-    #threeCanvasContainer {
-      width: 100%;
-      height: 100%;
-    }
-    .globe-hud-overlay {
-      position: absolute;
-      inset: 10px;
-      pointer-events: none;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .globe-hud-top {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--theme);
-    }
-    .globe-hud-bottom {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-    }
-    .hud-year-pill {
-      background: rgba(0, 0, 0, 0.75);
-      border: 1px solid var(--theme);
-      padding: 4px 10px;
-      border-radius: 8px;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 18px;
-      font-weight: 900;
-      color: var(--theme);
-      box-shadow: 0 0 15px var(--theme-glow);
-    }
-
-    /* 3D Holographic Vinyl Turntable Mini-Deck */
-    .turntable-strip {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      padding: 12px;
-      border-radius: 14px;
-    }
-    .vinyl-3d {
-      width: 74px;
-      height: 74px;
-      border-radius: 50%;
-      background: repeating-radial-gradient(#0b0f19 0, #0b0f19 3px, #1e293b 4px, #0b0f19 5px);
-      border: 3px solid var(--theme);
-      box-shadow: 0 0 18px var(--theme-glow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      position: relative;
-    }
-    .vinyl-3d.spinning {
-      animation: spinVinyl 3s linear infinite;
-    }
-    @keyframes spinVinyl {
-      100% { transform: rotate(360deg); }
-    }
-    .vinyl-core {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      background: var(--theme);
-      color: #000;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 8px;
-      font-weight: 900;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    /* Dual Real-Time Audio Oscilloscope & FFT Spectrum */
-    .scope-box {
-      background: #030712;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      border-radius: 12px;
-      padding: 8px;
-      position: relative;
-    }
-    #audioScopeCanvas {
-      width: 100%;
-      height: 85px;
-      display: block;
-    }
-    .scope-labels {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      margin-top: 4px;
-    }
-
-    /* Center Column: Main Chart & Telemetry KPIs */
-    .chart-wrapper {
-      background: rgba(3, 7, 18, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 14px;
-      padding: 14px;
-      position: relative;
-      min-height: 270px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .kpi-matrix {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-    }
-    @media (max-width: 680px) {
-      .kpi-matrix { grid-template-columns: repeat(2, 1fr); }
-    }
-    .kpi-tile {
-      background: rgba(15, 23, 42, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      padding: 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      position: relative;
-      overflow: hidden;
-    }
-    .kpi-tile::after {
-      content: '';
-      position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--theme);
-      opacity: 0.6;
-    }
-    .kpi-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-    }
-    .kpi-number {
-      font-family: 'Orbitron', sans-serif;
-      font-size: 19px;
-      font-weight: 800;
-      color: var(--theme);
-    }
-    .kpi-sub {
-      font-size: 11px;
-      color: #cbd5e1;
-    }
-
-    /* Live Anomaly Readout Banner */
-    .anomaly-console {
-      background: linear-gradient(90deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.85));
-      border: 1px solid var(--border-glass);
-      border-left: 5px solid var(--theme);
-      border-radius: 14px;
-      padding: 14px 18px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      transition: all 0.25s ease;
-    }
-    .anomaly-console.alert-active {
-      border-color: var(--danger);
-      border-left: 6px solid var(--danger);
-      box-shadow: 0 0 30px var(--danger-glow);
-      background: linear-gradient(90deg, rgba(69, 10, 26, 0.9), rgba(15, 23, 42, 0.95));
-    }
-    .console-text-group {
-      flex: 1;
-      min-width: 240px;
-    }
-    .console-eyebrow {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      font-weight: 800;
-      color: var(--theme);
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-    }
-    .console-headline {
-      font-size: 15px;
-      font-weight: 700;
-      color: #fff;
-      margin-top: 4px;
-      line-height: 1.4;
-    }
-    .status-pill {
-      padding: 7px 14px;
-      border-radius: 999px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 800;
-      background: rgba(16, 185, 129, 0.18);
-      border: 1px solid var(--success);
-      color: #6ee7b7;
-      white-space: nowrap;
-    }
-    .status-pill.critical {
-      background: var(--danger);
-      border-color: #fff;
-      color: #fff;
-      animation: flashAlert 0.6s infinite alternate;
-    }
-    @keyframes flashAlert {
-      from { opacity: 1; transform: scale(1); }
-      to { opacity: 0.7; transform: scale(1.04); }
-    }
-
-    /* Right Column: Multi-Channel Synth Mixer & 8-Pad FX Board */
-    .mixer-channels {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .channel-row {
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 10px;
-      padding: 8px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .channel-top {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-    }
-    .channel-name {
-      font-weight: 700;
-      color: #e2e8f0;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .mute-toggle {
-      padding: 2px 7px;
-      border-radius: 5px;
-      font-size: 10px;
-      font-weight: 800;
-      border: 1px solid var(--theme);
-      background: var(--theme-soft);
-      color: var(--theme);
-      cursor: pointer;
-    }
-    .mute-toggle.muted {
-      border-color: #64748b;
-      background: transparent;
-      color: #64748b;
-    }
-
-    input[type="range"].synth-slider {
-      width: 100%;
-      height: 5px;
-      accent-color: var(--theme);
-      cursor: pointer;
-    }
-
-    /* 8-Pad Live Sound FX Trigger Grid */
-    .fx-pad-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
-    }
-    .fx-pad {
-      padding: 10px 8px;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      background: linear-gradient(180deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95));
-      color: #f8fafc;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 700;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.15s ease;
-    }
-    .fx-pad:hover {
-      border-color: var(--theme);
-      box-shadow: 0 0 12px var(--theme-glow);
-    }
-    .fx-pad:active, .fx-pad.triggered {
-      background: var(--theme);
-      color: #000;
-      transform: scale(0.95);
-    }
-
-    /* Master Transport Deck (Bottom Controller) */
-    .transport-deck {
-      background: var(--bg-panel);
-      border: 1px solid var(--border-glass);
-      border-radius: 18px;
-      padding: 18px 24px;
-      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.6);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-    .transport-controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 14px;
-    }
-    .transport-left, .transport-center, .transport-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .play-master-btn {
-      padding: 12px 24px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, var(--theme), var(--theme-alt));
-      color: #020617;
-      font-family: 'Orbitron', sans-serif;
-      font-size: 14px;
-      font-weight: 900;
-      cursor: pointer;
-      box-shadow: 0 0 25px var(--theme-glow);
-      transition: all 0.2s ease;
-    }
-    .play-master-btn:hover {
-      transform: scale(1.03);
-    }
-
-    .timeline-scrubber-wrap {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    #masterScrubber {
-      width: 100%;
-      height: 10px;
-      accent-color: var(--theme);
-      cursor: pointer;
-    }
-    .timeline-ticks {
-      display: flex;
-      justify-content: space-between;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      color: var(--text-muted);
-    }
-
-    /* Bottom Telemetry Log & Historical Matrix Table */
-    .bottom-matrix-grid {
-      display: grid;
-      grid-template-columns: 1fr 380px;
-      gap: 18px;
-    }
-    @media (max-width: 1024px) {
-      .bottom-matrix-grid { grid-template-columns: 1fr; }
-    }
-
-    .table-scroll {
-      max-height: 220px;
-      overflow-y: auto;
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    table.nasa-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      text-align: left;
-    }
-    table.nasa-table th {
-      background: rgba(15, 23, 42, 0.95);
-      color: var(--theme);
-      padding: 10px 12px;
-      position: sticky;
-      top: 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-    }
-    table.nasa-table td {
-      padding: 8px 12px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      color: #cbd5e1;
-      cursor: pointer;
-    }
-    table.nasa-table tr:hover td {
-      background: rgba(255, 255, 255, 0.05);
-    }
-    table.nasa-table tr.active-row td {
-      background: var(--theme-soft);
-      color: #ffffff;
-      font-weight: 800;
-    }
-
-    /* Live Terminal Event Log */
-    .terminal-log {
-      background: #020617;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 10px;
-      padding: 10px 12px;
-      height: 220px;
-      overflow-y: auto;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .log-entry {
-      color: #94a3b8;
-      border-left: 2px solid var(--theme);
-      padding-left: 8px;
-      line-height: 1.35;
-    }
-    .log-entry.alert {
-      border-left-color: var(--danger);
-      color: #fda4af;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
@@ -819,17 +16,15 @@
   <div class="scanlines"></div>
 
   <div class="app-shell">
-    <!-- Top Live Satellite Telemetry Bar -->
     <div class="top-ticker">
       <div>
         <span class="status-dot"></span>
-        <strong>LINK STATUS:</strong> 1-FRONTEND ➔ 2-BACKEND (PORT 5000) ➔ 3-MEMORY ARCHIVE ACTIVE
+        <strong>ARCHITECTURE:</strong> 1-FRONTEND (UI/CSS) ➔ 2-BACKEND (API) ➔ 3-MEMORY (15-EPOCH NASA JSON)
       </div>
       <div id="liveClockDisplay">UTC TELEMETRY CLOCK: SYNCHRONIZING...</div>
-      <div>AUDIO ENGINE: <strong>5-CHANNEL WEB AUDIO SYNTH + PROCEDURAL TEXTURE GENERATOR</strong></div>
+      <div>DSP ENGINE: <strong>5-CHANNEL WEB AUDIO SYNTH + LOW-LATENCY WEBGL</strong></div>
     </div>
 
-    <!-- Main Cyber HUD Header -->
     <header class="hud-header">
       <div class="brand-cluster">
         <div class="nasa-emblem">
@@ -838,25 +33,32 @@
         </div>
         <div class="title-block">
           <h1>EARTH JUKEBOX 3D: PLANETARY SONIFICATION STUDIO</h1>
-          <p id="missionSourceText">MISSION ARCHIVE: GPM IMERG / POWER MERRA-2 / MODIS AQUA / GRACE-FO GRAVIMETRY</p>
+          <p id="missionSourceText">MISSION ARCHIVE: GPM IMERG / POWER MERRA-2 / MODIS AQUA / GRACE-FO</p>
         </div>
       </div>
 
       <div class="header-actions">
-        <button class="cyber-btn" id="voiceBtn" onclick="toggleVoiceSynth()">🔊 AI Voice Telemetry: OFF</button>
-        <button class="cyber-btn active" id="ambienceBtn" onclick="toggleAmbience()">🌧️ Weather Ambience: ON</button>
-        <button class="cyber-btn" onclick="toggleScanlines()">📺 CRT Scanlines</button>
+        <button class="cyber-btn" id="voiceBtn" onclick="toggleVoiceSynth()">🔊 AI Voice: OFF</button>
+        <button class="cyber-btn active" id="ambienceBtn" onclick="toggleAmbience()">🌧️ Ambience: ON</button>
+        <button class="cyber-btn" onclick="toggleScanlines()">📺 Scanlines</button>
         <button class="cyber-btn" onclick="toggleHighContrast()">⚡ High-Contrast</button>
       </div>
     </header>
 
-    <!-- 3-Track Jukebox Slot Cards -->
+    <!-- Live Satellite Telemetry Ribbon -->
+    <div class="telemetry-ribbon">
+      <div class="ribbon-chip"><span>ACTIVE SATELLITE</span><strong id="ribbonSat">GPM / TERRA</strong></div>
+      <div class="ribbon-chip"><span>DATA RESOLUTION</span><strong id="ribbonRes">15 HISTORICAL EPOCHS</strong></div>
+      <div class="ribbon-chip"><span>ARCHIVE SOURCE</span><strong id="ribbonArchive">3-MEMORY SYNCED</strong></div>
+      <div class="ribbon-chip"><span>RENDER PIPELINE</span><strong>60FPS GPU WEBGL</strong></div>
+    </div>
+
     <section class="track-selector-grid">
       <div class="track-card active" id="card-rain" onclick="switchTrack('rain')">
         <div class="track-info">
           <span class="track-badge">DISC 01 • GPM & POWER SATELLITE</span>
           <div class="track-title">Atmospheric Rain & Monsoon Heat</div>
-          <div class="track-desc">1985–2025 • Crystal Pluck Arpeggio + Rainstorm White Noise</div>
+          <div class="track-desc">1980–2025 (15 Epochs) • Crystal Pluck + Monsoon Static</div>
         </div>
         <div class="track-icon-orb">🌧️</div>
       </div>
@@ -865,29 +67,26 @@
         <div class="track-info">
           <span class="track-badge">DISC 02 • MODIS AQUA & JASON-3</span>
           <div class="track-title">Indian Ocean Thermal Swell</div>
-          <div class="track-desc">1993–2025 • Deep FM Pad Chord + Ocean Surf Filter Sweep</div>
+          <div class="track-desc">1993–2025 (15 Epochs) • Deep FM Pad + Surf Filter Sweep</div>
         </div>
         <div class="track-icon-orb">🌊</div>
       </div>
 
       <div class="track-card" id="card-glacier" onclick="switchTrack('glacier')">
         <div class="track-info">
-          <span class="track-badge">DISC 03 • GRACE & GRACE-FO</span>
+          <span class="track-badge">DISC 03 • GRACE-FO & ICESAT-2</span>
           <div class="track-title">Antarctic & Polar Ice Mass Loss</div>
-          <div class="track-desc">2002–2025 • Sub-Bass Cryo Drone + Ice Crack & Siren Alert</div>
+          <div class="track-desc">2002–2025 (15 Epochs) • Sub-Bass Cryo Drone + Ice Fracture</div>
         </div>
         <div class="track-icon-orb">🧊</div>
       </div>
     </section>
 
-    <!-- Main 3-Column Studio Cockpit -->
     <section class="cockpit-grid">
-
-      <!-- LEFT COLUMN: 3D WebGL Earth + Holographic Turntable + Live Oscilloscope -->
       <div class="glass-panel">
         <div class="panel-header">
           <div class="panel-title">🌐 3D Orbital Telemetry Globe</div>
-          <span class="panel-tag">DRAG TO ROTATE 3D</span>
+          <span class="panel-tag">DRAG TO ROTATE</span>
         </div>
 
         <div class="globe-viewport" id="globeViewport">
@@ -900,7 +99,7 @@
             <div class="globe-hud-bottom">
               <div>
                 <div style="font-size: 9px; color: #94a3b8;">TIMELINE EPOCH</div>
-                <div class="hud-year-pill" id="globeYearBadge">1985</div>
+                <div class="hud-year-pill" id="globeYearBadge">1980</div>
               </div>
               <div style="text-align: right;">
                 <div style="font-size: 9px; color: #94a3b8;">ACOUSTIC PITCH</div>
@@ -910,82 +109,76 @@
           </div>
         </div>
 
-        <!-- Mini 3D Spinning Vinyl & Track Status -->
         <div class="turntable-strip">
           <div class="vinyl-3d" id="vinylDisc">
             <div class="vinyl-core" id="vinylCoreText">LP</div>
           </div>
           <div style="display: flex; flex-direction: column; gap: 3px;">
             <div style="font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; color: #fff;" id="turntableTrackName">
-              TRACK 01: MONSOON EXTREMES
+              DISC 01: MONSOON EXTREMES
             </div>
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--theme);" id="turntableSynthInfo">
-              Chord: C-Maj9 | Delay Echo: 35%
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--theme);">
+              Harmonic Scale: Pentatonic + Alert
             </div>
             <div style="font-size: 11px; color: var(--text-muted);">
-              Big climate jump ➔ Auto high-pitch harmonic + sub-drop
+              Climate jump ➔ Auto harmonic pitch & sub-drop
             </div>
           </div>
         </div>
 
-        <!-- Real-Time Web Audio Oscilloscope & FFT Spectrum Canvas -->
         <div class="scope-box">
           <canvas id="audioScopeCanvas" width="340" height="85"></canvas>
           <div class="scope-labels">
             <span>LIVE FFT SPECTRUM + OSCILLOSCOPE</span>
-            <span id="dbMeterText">-12.4 dB PEAK</span>
+            <span id="dbMeterText">-48.0 dB PEAK</span>
           </div>
         </div>
       </div>
 
-      <!-- CENTER COLUMN: Interactive Synchronized Chart + 4 KPI Cards + Anomaly Console -->
       <div class="glass-panel">
         <div class="panel-header">
-          <div class="panel-title" id="chartHeaderTitle">📈 Historical Satellite Time-Series</div>
-          <span class="panel-tag" id="chartScaleTag">SCALE: PENTATONIC + CHROMATIC ALERT</span>
+          <div class="panel-title">📈 15-Epoch Satellite Time-Series</div>
+          <span class="panel-tag">CLICK GRAPH OR TABLE</span>
         </div>
 
         <div class="chart-wrapper">
           <canvas id="mainTelemetryChart" height="145"></canvas>
         </div>
 
-        <!-- 4 Live Telemetry KPI Cards -->
         <div class="kpi-matrix">
           <div class="kpi-tile">
             <span class="kpi-name" id="kpiLabelPrimary">PRIMARY METRIC</span>
             <span class="kpi-number" id="kpiValPrimary">--</span>
-            <span class="kpi-sub" id="kpiSubPrimary">Satellite Reading</span>
+            <span class="kpi-sub">Satellite Reading</span>
           </div>
           <div class="kpi-tile">
             <span class="kpi-name" id="kpiLabelSecondary">SECONDARY METRIC</span>
             <span class="kpi-number" id="kpiValSecondary">--</span>
-            <span class="kpi-sub" id="kpiSubSecondary">Intensity Factor</span>
+            <span class="kpi-sub">Intensity Factor</span>
           </div>
           <div class="kpi-tile">
             <span class="kpi-name">SYNTH FREQUENCY</span>
             <span class="kpi-number" id="kpiValFreq">220 Hz</span>
-            <span class="kpi-sub" id="kpiSubNote">Musical Note: A3</span>
+            <span class="kpi-sub" id="kpiSubNote">Note: A3</span>
           </div>
           <div class="kpi-tile">
             <span class="kpi-name">DELTA ANOMALY JUMP</span>
             <span class="kpi-number" id="kpiValDelta">0.0</span>
-            <span class="kpi-sub" id="kpiSubDelta">Year-over-Year Shift</span>
+            <span class="kpi-sub">Epoch Shift</span>
           </div>
         </div>
 
-        <!-- Dynamic Anomaly Readout Console -->
-        <div class="anomaly-console" id="anomalyConsole" aria-live="polite">
+        <div class="anomaly-console" id="anomalyConsole">
           <div class="console-text-group">
             <div class="console-eyebrow">LIVE SONIFICATION INTERPRETATION (DATA ➔ SOUND)</div>
             <div class="console-headline" id="explanationBannerText">
-              Click "▶ Play Master Sonification" below to launch the 3D audio-visual telemetry stream.
+              Click "▶ Play Master Sonification" below to stream all 15 NASA historical epochs.
             </div>
           </div>
           <div class="status-pill" id="anomalyStatusPill">BASELINE STABLE</div>
         </div>
       </div>
 
-      <!-- RIGHT COLUMN: 5-Channel Studio Synth Mixer + 8-Pad Live SoundFX Board -->
       <div class="glass-panel cockpit-right">
         <div class="panel-header">
           <div class="panel-title">🎛️ 5-Channel Synth Mixer</div>
@@ -993,7 +186,6 @@
         </div>
 
         <div class="mixer-channels">
-          <!-- Channel 1: Lead Synth -->
           <div class="channel-row">
             <div class="channel-top">
               <span class="channel-name">🎹 CH1: Harmonic Lead Pitch</span>
@@ -1002,7 +194,6 @@
             <input type="range" class="synth-slider" id="vol-lead" min="0" max="100" value="80" />
           </div>
 
-          <!-- Channel 2: Sub-Bass Drone -->
           <div class="channel-row">
             <div class="channel-top">
               <span class="channel-name">🔊 CH2: Deep Sub-Bass Drone</span>
@@ -1011,7 +202,6 @@
             <input type="range" class="synth-slider" id="vol-bass" min="0" max="100" value="70" />
           </div>
 
-          <!-- Channel 3: Weather/Ocean/Ice Texture -->
           <div class="channel-row">
             <div class="channel-top">
               <span class="channel-name">🌪️ CH3: Procedural Weather FX</span>
@@ -1020,7 +210,6 @@
             <input type="range" class="synth-slider" id="vol-noise" min="0" max="100" value="65" />
           </div>
 
-          <!-- Channel 4: Percussion Beat & Sonar Pulse -->
           <div class="channel-row">
             <div class="channel-top">
               <span class="channel-name">🥁 CH4: Rhythmic Pulse & Kick</span>
@@ -1029,7 +218,6 @@
             <input type="range" class="synth-slider" id="vol-perc" min="0" max="100" value="75" />
           </div>
 
-          <!-- Channel 5: Stereo Echo Delay & Anomaly Siren -->
           <div class="channel-row">
             <div class="channel-top">
               <span class="channel-name">🚨 CH5: Anomaly Siren & Echo</span>
@@ -1040,7 +228,7 @@
         </div>
 
         <div class="panel-header" style="margin-top: 4px;">
-          <div class="panel-title">⚡ Live DJ Telemetry Soundboard</div>
+          <div class="panel-title">⚡ Live DJ Soundboard</div>
           <span class="panel-tag">CLICK PADS</span>
         </div>
 
@@ -1051,14 +239,12 @@
           <button class="fx-pad" onclick="triggerSoundPad('icecrack', this)">🧊 Glacier Fracture</button>
           <button class="fx-pad" onclick="triggerSoundPad('geiger', this)">☢️ Geiger Radiation</button>
           <button class="fx-pad" onclick="triggerSoundPad('siren', this)">🚨 Red Alert Klaxon</button>
-          <button class="fx-pad" onclick="triggerSoundPad('swell', this)">🌊 Deep Rogue Swell</button>
-          <button class="fx-pad" onclick="triggerSoundPad('laser', this)">✨ Orbital Telemetry</button>
+          <button class="fx-pad" onclick="triggerSoundPad('swell', this)">🌊 Deep Swell</button>
+          <button class="fx-pad" onclick="triggerSoundPad('laser', this)">✨ Orbital Sweep</button>
         </div>
       </div>
-
     </section>
 
-    <!-- Master Transport & Timeline Scrubber Deck -->
     <section class="transport-deck">
       <div class="transport-controls">
         <div class="transport-left">
@@ -1066,12 +252,12 @@
             ▶ PLAY MASTER SONIFICATION
           </button>
           <button class="cyber-btn" onclick="stopMasterAudio()">■ STOP & RESET</button>
-          <button class="cyber-btn" onclick="stepBackward()">⏮ PREV YEAR</button>
-          <button class="cyber-btn" onclick="stepForward()">⏭ NEXT YEAR</button>
+          <button class="cyber-btn" onclick="stepBackward()">⏮ PREV</button>
+          <button class="cyber-btn" onclick="stepForward()">⏭ NEXT</button>
         </div>
 
         <div class="transport-center">
-          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">TEMPO SPEED:</span>
+          <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">SPEED:</span>
           <button class="cyber-btn" id="speed-0.5" onclick="changeSpeed(0.5)">0.5x</button>
           <button class="cyber-btn active" id="speed-1" onclick="changeSpeed(1)">1x</button>
           <button class="cyber-btn" id="speed-1.5" onclick="changeSpeed(1.5)">1.5x</button>
@@ -1079,24 +265,23 @@
         </div>
 
         <div class="transport-right">
-          <div style="font-family: 'Orbitron', sans-serif; font-size: 15px; font-weight: 800; color: var(--theme);" id="stepProgressText">
-            STEP 01 / 09 (YEAR 1985)
+          <div style="font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; color: var(--theme);" id="stepProgressText">
+            STEP 01 / 15 (YEAR 1980)
           </div>
         </div>
       </div>
 
       <div class="timeline-scrubber-wrap">
-        <input type="range" id="masterScrubber" min="0" max="8" value="0" oninput="scrubTimeline(this.value)" />
+        <input type="range" id="masterScrubber" min="0" max="14" value="0" oninput="scrubTimeline(this.value)" />
         <div class="timeline-ticks" id="timelineTicksContainer"></div>
       </div>
     </section>
 
-    <!-- Bottom Historical Archive Matrix Table & Live Event Log -->
     <section class="bottom-matrix-grid">
       <div class="glass-panel">
         <div class="panel-header">
-          <div class="panel-title">🗂️ Interactive NASA Archival Data Matrix (Click Any Row to Audition Year)</div>
-          <span class="panel-tag">3-MEMORY ARCHIVE</span>
+          <div class="panel-title">🗂️ NASA 15-Epoch Archival Matrix (Click Row to Audition)</div>
+          <span class="panel-tag">3-MEMORY JSON</span>
         </div>
         <div class="table-scroll">
           <table class="nasa-table">
@@ -1116,83 +301,101 @@
 
       <div class="glass-panel">
         <div class="panel-header">
-          <div class="panel-title">🖥️ Acoustic Telemetry Log</div>
-          <span class="panel-tag">REAL-TIME DSP</span>
+          <div class="panel-title">🖥️ Telemetry Log</div>
+          <span class="panel-tag">DSP READY</span>
         </div>
         <div class="terminal-log" id="terminalLogBox">
-          <div class="log-entry">[SYSTEM] NASA Earth Jukebox 3D Studio Initialized.</div>
-          <div class="log-entry">[3D ENGINE] Three.js WebGL Orbital Planet & Starfield Online.</div>
-          <div class="log-entry">[AUDIO DSP] 5-Channel Web Audio Synthesizer Ready.</div>
+          <div class="log-entry">[SYSTEM] 1-Frontend HTML + style.css linked.</div>
+          <div class="log-entry">[3-MEMORY] 15-Epoch NASA datasets ready.</div>
         </div>
       </div>
     </section>
   </div>
 
   <script>
-    /********************************************************************
-     * 1. OFFICIAL HISTORICAL NASA DATASETS (BACKEND + EMBEDDED FALLBACK)
-     ********************************************************************/
-    const BACKEND_URL = 'http://localhost:5000/data';
-
     const FALLBACK_ARCHIVE = {
       rain: {
         datasetId: "rain",
-        title: "Atmospheric Temp & Monsoon Extremes (1985–2025)",
+        title: "Atmospheric Temp & Monsoon Extremes (1980–2025)",
         source: "NASA POWER (MERRA-2) & GPM IMERG Satellite Archive",
-        coords: "LAT: 12.97° N | LON: 77.59° E (BENGALURU / SOUTH ASIA)",
+        coords: "LAT: 12.97° N | LON: 77.59° E (SOUTH ASIA MONSOON CORE)",
+        satellite: "GPM Core Observatory / Terra",
         unitPrimary: "°C (Peak Avg)",
         unitSecondary: "mm (Max Daily Burst)",
         records: [
-          { index: 0, date: "1985", raw: { primary: 27.1, secondary: 42.0 }, norm: { pitch: 0.15, intensity: 0.20 }, explanation: "1985 Baseline: Stable 27.1°C temperature with moderate 42mm monsoon rain." },
-          { index: 1, date: "1990", raw: { primary: 27.4, secondary: 51.5 }, norm: { pitch: 0.25, intensity: 0.28 }, explanation: "1990: Slight warming (+0.3°C). Pitch rises gently with light rain harmonics." },
-          { index: 2, date: "1995", raw: { primary: 27.9, secondary: 68.0 }, norm: { pitch: 0.38, intensity: 0.42 }, explanation: "1995: Noticeable thermal shift to 27.9°C; heavier 68mm cloudbursts trigger brighter chime." },
-          { index: 3, date: "2000", raw: { primary: 28.2, secondary: 59.0 }, norm: { pitch: 0.48, intensity: 0.35 }, explanation: "2000: Millennial baseline reaches 28.2°C; mid-frequency synth tone stabilizes." },
-          { index: 4, date: "2005", raw: { primary: 28.8, secondary: 94.5 }, norm: { pitch: 0.62, intensity: 0.65 }, explanation: "2005 Spike: Sharp jump to 94.5mm extreme rain! High-pitch raindrop arpeggio activates." },
-          { index: 5, date: "2010", raw: { primary: 29.3, secondary: 112.0 }, norm: { pitch: 0.74, intensity: 0.78 }, explanation: "2010 El Niño Effect: 29.3°C heat pushes pitch higher with louder storm resonance." },
-          { index: 6, date: "2015", raw: { primary: 29.8, secondary: 128.4 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2015 Record Heat: Near 30°C threshold. High-frequency alert harmonics engage." },
-          { index: 7, date: "2020", raw: { primary: 30.2, secondary: 145.0 }, norm: { pitch: 0.92, intensity: 0.94 }, explanation: "2020 Extreme Event: 145mm flash rain burst creates rapid high-pitch acoustic shimmer." },
-          { index: 8, date: "2025", raw: { primary: 30.8, secondary: 162.5 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Peak Anomaly: +3.7°C above 1985 baseline. Maximum pitch & full harmonic intensity." }
+          { index: 0, date: "1980", raw: { primary: 26.8, secondary: 38.0 }, norm: { pitch: 0.10, intensity: 0.15 }, explanation: "1980 Pre-GPM Baseline: Calm 26.8°C regional average with steady 38mm monsoon precipitation." },
+          { index: 1, date: "1985", raw: { primary: 27.1, secondary: 42.0 }, norm: { pitch: 0.15, intensity: 0.20 }, explanation: "1985 Baseline: Stable 27.1°C temperature with moderate 42mm monsoon rain." },
+          { index: 2, date: "1988", raw: { primary: 27.3, secondary: 58.4 }, norm: { pitch: 0.22, intensity: 0.31 }, explanation: "1988 La Niña Surge: Heavy monsoon trough brings 58.4mm intense regional downpours." },
+          { index: 3, date: "1990", raw: { primary: 27.4, secondary: 51.5 }, norm: { pitch: 0.25, intensity: 0.28 }, explanation: "1990: Slight warming (+0.3°C). Pitch rises gently with light rain harmonics." },
+          { index: 4, date: "1994", raw: { primary: 27.7, secondary: 64.2 }, norm: { pitch: 0.33, intensity: 0.39 }, explanation: "1994 Positive Indian Ocean Dipole: Moisture convergence boosts cloudburst intensity." },
+          { index: 5, date: "1995", raw: { primary: 27.9, secondary: 68.0 }, norm: { pitch: 0.38, intensity: 0.42 }, explanation: "1995: Noticeable thermal shift to 27.9°C; heavier 68mm cloudbursts trigger brighter chime." },
+          { index: 6, date: "1998", raw: { primary: 28.5, secondary: 82.0 }, norm: { pitch: 0.54, "intensity": 0.52 }, explanation: "1998 Super El Niño Anomaly: Sharp +0.6°C thermal spike triggers mid-high harmonic alert." },
+          { index: 7, date: "2000", raw: { primary: 28.2, secondary: 59.0 }, norm: { pitch: 0.48, intensity: 0.35 }, explanation: "2000: Millennial baseline reaches 28.2°C; mid-frequency synth tone stabilizes." },
+          { index: 8, date: "2005", raw: { primary: 28.8, secondary: 94.5 }, norm: { pitch: 0.62, intensity: 0.65 }, explanation: "2005 Extreme Cloudburst: Sharp jump to 94.5mm extreme rain! High-pitch raindrop arpeggio activates." },
+          { index: 9, date: "2010", raw: { primary: 29.3, secondary: 112.0 }, norm: { pitch: 0.74, intensity: 0.78 }, explanation: "2010 El Niño Effect: 29.3°C heat pushes pitch higher with louder storm resonance." },
+          { index: 10, date: "2015", raw: { primary: 29.8, secondary: 128.4 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2015 Record Heat: Near 30°C threshold. High-frequency alert harmonics engage." },
+          { index: 11, date: "2018", raw: { primary: 30.0, secondary: 139.2 }, norm: { pitch: 0.89, intensity: 0.90 }, explanation: "2018 Severe Flooding Epoch: GPM IMERG records 139.2mm convective burst." },
+          { index: 12, date: "2020", raw: { primary: 30.2, secondary: 145.0 }, norm: { pitch: 0.92, intensity: 0.94 }, explanation: "2020 Extreme Event: 145mm flash rain burst creates rapid high-pitch acoustic shimmer." },
+          { index: 13, date: "2023", raw: { primary: 30.6, secondary: 154.8 }, norm: { pitch: 0.96, intensity: 0.97 }, explanation: "2023 Thermal Record: 30.6°C land-atmosphere coupling drives extreme monsoon volatility." },
+          { index: 14, date: "2025", raw: { primary: 30.9, secondary: 164.0 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Peak Anomaly: +4.1°C above 1980 baseline. Maximum pitch & full harmonic intensity." }
         ]
       },
       ocean: {
         datasetId: "ocean",
         title: "Indian Ocean Thermal Expansion & Swell (1993–2025)",
-        source: "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason-3 Altimetry",
+        source: "NASA MODIS Aqua SST & TOPEX/Poseidon/Jason-3/Sentinel-6 Altimetry",
         coords: "LAT: 08.40° N | LON: 73.10° E (ARABIAN SEA / INDIAN OCEAN)",
+        satellite: "Jason-3 / MODIS Aqua / Sentinel-6",
         unitPrimary: "°C (Sea Surface)",
         unitSecondary: "mm (Sea Level Rise)",
         records: [
-          { index: 0, date: "1993", raw: { primary: 26.8, secondary: 0.0 }, norm: { pitch: 0.12, intensity: 0.15 }, explanation: "1993 TOPEX Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
-          { index: 1, date: "1997", raw: { primary: 27.3, secondary: 14.2 }, norm: { pitch: 0.28, intensity: 0.30 }, explanation: "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
-          { index: 2, date: "2001", raw: { primary: 27.5, secondary: 26.8 }, norm: { pitch: 0.36, intensity: 0.38 }, explanation: "2001: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
-          { index: 3, date: "2005", raw: { primary: 27.9, secondary: 41.0 }, norm: { pitch: 0.50, intensity: 0.50 }, explanation: "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
-          { index: 4, date: "2010", raw: { primary: 28.4, secondary: 58.5 }, norm: { pitch: 0.66, intensity: 0.65 }, explanation: "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
-          { index: 5, date: "2016", raw: { primary: 29.1, secondary: 79.2 }, norm: { pitch: 0.84, intensity: 0.82 }, explanation: "2016 Coral Bleaching Peak: +0.7°C sudden jump! Sharp pitch rise and heavy vibrato." },
-          { index: 6, date: "2020", raw: { primary: 29.4, secondary: 94.0 }, norm: { pitch: 0.92, intensity: 0.90 }, explanation: "2020: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
-          { index: 7, date: "2025", raw: { primary: 29.9, secondary: 111.5 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Critical Thermal High: 29.9°C & +111.5mm rise. Peak frequency & maximum wave pulse." }
+          { index: 0, date: "1993", raw: { primary: 26.8, secondary: 0.0 }, norm: { pitch: 0.12, intensity: 0.15 }, explanation: "1993 TOPEX/Poseidon Launch Baseline: Calm 26.8°C ocean. Low, gentle sine-wave pad." },
+          { index: 1, date: "1995", raw: { primary: 27.0, secondary: 6.4 }, norm: { pitch: 0.19, intensity: 0.21 }, explanation: "1995: Early altimetry tracks +6.4mm steric sea level expansion." },
+          { index: 2, date: "1997", raw: { primary: 27.3, secondary: 14.2 }, norm: { pitch: 0.28, intensity: 0.30 }, explanation: "1997 Dipole Shift: +0.5°C warming lifts ocean chord pitch; +14.2mm sea level rise." },
+          { index: 3, date: "1999", raw: { primary: 27.4, secondary: 20.1 }, norm: { pitch: 0.32, intensity: 0.34 }, explanation: "1999 La Niña Rebound: Subsurface heat uptake continues steady upward trend." },
+          { index: 4, date: "2001", raw: { primary: 27.5, secondary: 26.8 }, norm: { pitch: 0.36, intensity: 0.38 }, explanation: "2001 Jason-1 Calibration: Steady thermal absorption (+26.8mm). Warm mid-range frequency swell." },
+          { index: 5, date: "2003", raw: { primary: 27.7, secondary: 33.5 }, norm: { pitch: 0.43, intensity: 0.44 }, explanation: "2003 MODIS Aqua Era: High-resolution IR radiometry confirms basin-wide warming." },
+          { index: 6, date: "2005", raw: { primary: 27.9, secondary: 41.0 }, norm: { pitch: 0.50, intensity: 0.50 }, explanation: "2005: Sea surface nears 28°C. Faster LFO wave modulation reflects deeper swells." },
+          { index: 7, date: "2008", raw: { primary: 28.1, secondary: 49.4 }, norm: { pitch: 0.58, intensity: 0.57 }, explanation: "2008 OSTM/Jason-2 Launch: Sea level crosses +49mm above 1993 reference ellipsoid." },
+          { index: 8, date: "2010", raw: { primary: 28.4, secondary: 58.5 }, norm: { pitch: 0.66, intensity: 0.65 }, explanation: "2010 Marine Heatwave: 28.4°C triggers higher harmonic overtone and louder swell." },
+          { index: 9, date: "2013", raw: { primary: 28.6, secondary: 67.8 }, norm: { pitch: 0.73, intensity: 0.72 }, explanation: "2013: Accelerated thermosteric expansion in the Arabian Sea basin." },
+          { index: 10, date: "2016", raw: { primary: 29.1, secondary: 79.2 }, norm: { pitch: 0.84, intensity: 0.82 }, explanation: "2016 Coral Bleaching Peak: +0.5°C jump! Sharp pitch rise and heavy vibrato." },
+          { index: 11, date: "2018", raw: { primary: 29.2, secondary: 86.5 }, norm: { pitch: 0.88, intensity: 0.86 }, explanation: "2018 Cyclone Intensification: High ocean heat content fuels rapid storm spin-up." },
+          { index: 12, date: "2020", raw: { primary: 29.4, secondary: 94.0 }, norm: { pitch: 0.92, intensity: 0.90 }, explanation: "2020 Sentinel-6 Era: Sea level +94mm above 1993 baseline. High-energy resonant ocean chord." },
+          { index: 13, date: "2023", raw: { primary: 29.7, secondary: 103.8 }, norm: { pitch: 0.96, intensity: 0.96 }, explanation: "2023 Global SST Anomaly: Exceeds 100mm cumulative regional sea-level rise." },
+          { index: 14, date: "2025", raw: { primary: 29.9, secondary: 112.4 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Critical Thermal High: 29.9°C & +112.4mm rise. Peak frequency & maximum wave pulse." }
         ]
       },
       glacier: {
         datasetId: "glacier",
         title: "Antarctica & Greenland Polar Ice Mass Loss (2002–2025)",
-        source: "NASA GRACE & GRACE-FO Satellite Gravimetry Mission",
-        coords: "LAT: 75.00° S | LON: 105.00° W (AMUNDSEN SEA / ANTARCTICA)",
+        source: "NASA GRACE & GRACE-FO Satellite Gravimetry & ICESat-2",
+        coords: "LAT: 75.00° S | LON: 105.00° W (AMUNDSEN SEA / THWAITES SECTOR)",
+        satellite: "GRACE-FO / ICESat-2 Altimeter",
         unitPrimary: "Gigatonnes (Gt Ice Loss)",
         unitSecondary: "Gt/yr (Melt Acceleration)",
         records: [
-          { index: 0, date: "2002", raw: { primary: 0, secondary: 85 }, norm: { pitch: 0.15, intensity: 0.15 }, explanation: "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
-          { index: 1, date: "2005", raw: { primary: -410, secondary: 115 }, norm: { pitch: 0.28, intensity: 0.28 }, explanation: "2005 (-410 Gt lost): Initial ice shelf thinning raises tension pitch slightly." },
-          { index: 2, date: "2008", raw: { primary: -890, secondary: 148 }, norm: { pitch: 0.42, intensity: 0.42 }, explanation: "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
-          { index: 3, date: "2012", raw: { primary: -1540, secondary: 195 }, norm: { pitch: 0.60, intensity: 0.62 }, explanation: "2012 Extreme Melt Year (-1,540 Gt): Sharp 650 Gt drop triggers high-delta alarm harmonic!" },
-          { index: 4, date: "2016", raw: { primary: -2110, secondary: 215 }, norm: { pitch: 0.74, intensity: 0.75 }, explanation: "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
-          { index: 5, date: "2020", raw: { primary: -2680, secondary: 255 }, norm: { pitch: 0.88, intensity: 0.88 }, explanation: "2020 GRACE-FO Record (-2,680 Gt): Rapid West Antarctic grounding line retreat." },
-          { index: 6, date: "2025", raw: { primary: -3290, secondary: 290 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Cumulative Loss (-3,290 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
+          { index: 0, date: "2002", raw: { primary: 0, secondary: 85 }, norm: { pitch: 0.12, intensity: 0.14 }, explanation: "2002 GRACE Launch Baseline (0 Gt): Calm, low-volume baseline cryo-tone." },
+          { index: 1, date: "2004", raw: { primary: -240, secondary: 98 }, norm: { pitch: 0.20, intensity: 0.21 }, explanation: "2004 (-240 Gt): Early gravimetric detection of Jakobshavn & Pine Island thinning." },
+          { index: 2, date: "2005", raw: { primary: -410, secondary: 115 }, norm: { pitch: 0.28, intensity: 0.28 }, explanation: "2005 (-410 Gt lost): Initial ice shelf basal melt raises tension pitch." },
+          { index: 3, date: "2007", raw: { primary: -680, secondary: 134 }, norm: { pitch: 0.35, intensity: 0.36 }, explanation: "2007 Arctic Summer Minimum: Surface meltwater lakes accelerate glacier slip." },
+          { index: 4, date: "2008", raw: { primary: -890, secondary: 148 }, norm: { pitch: 0.42, intensity: 0.42 }, explanation: "2008 (-890 Gt lost): Melt rate accelerates to 148 Gt/yr; volume & pitch climb." },
+          { index: 5, date: "2010", raw: { primary: -1190, secondary: 172 }, norm: { pitch: 0.51, intensity: 0.52 }, explanation: "2010 (-1,190 Gt): Cumulative polar mass loss crosses 1 trillion metric tonnes." },
+          { index: 6, date: "2012", raw: { primary: -1540, secondary: 195 }, norm: { pitch: 0.62, intensity: 0.64 }, explanation: "2012 Extreme Melt Year (-1,540 Gt): 97% Greenland surface melt triggers high-delta alarm!" },
+          { index: 7, date: "2014", raw: { primary: -1820, secondary: 204 }, norm: { pitch: 0.68, intensity: 0.70 }, explanation: "2014 (-1,820 Gt): Warm circumpolar deep water erodes West Antarctic grounding lines." },
+          { index: 8, date: "2016", raw: { primary: -2110, secondary: 215 }, norm: { pitch: 0.74, intensity: 0.75 }, explanation: "2016 (-2,110 Gt): Over 2 trillion tonnes of polar ice lost. High-pitch warning synth." },
+          { index: 9, date: "2018", raw: { primary: -2390, secondary: 232 }, norm: { pitch: 0.81, intensity: 0.82 }, explanation: "2018 GRACE-FO & ICESat-2 Launch: Laser altimetry maps steepening glacier calving fronts." },
+          { index: 10, date: "2019", raw: { primary: -2540, secondary: 248 }, norm: { pitch: 0.85, intensity: 0.86 }, explanation: "2019 Atmospheric Blocking Event: Extreme Greenland mass balance deficit." },
+          { index: 11, date: "2020", raw: { primary: -2680, secondary: 255 }, norm: { pitch: 0.88, intensity: 0.88 }, explanation: "2020 GRACE-FO Record (-2,680 Gt): Rapid Thwaites & Pine Island ice shelf retreat." },
+          { index: 12, date: "2022", raw: { primary: -2940, secondary: 271 }, norm: { pitch: 0.93, intensity: 0.93 }, explanation: "2022 Late-Season Heatwave (-2,940 Gt): High-elevation melt events recorded." },
+          { index: 13, date: "2024", raw: { primary: -3150, secondary: 282 }, norm: { pitch: 0.97, intensity: 0.97 }, explanation: "2024 (-3,150 Gt): Over 3.1 trillion tonnes lost since 2002 baseline." },
+          { index: 14, date: "2025", raw: { primary: -3340, secondary: 295 }, norm: { pitch: 1.00, intensity: 1.00 }, explanation: "2025 Cumulative Loss (-3,340 Gt): Maximum anomaly! High-pitch siren & bass sub-drop." }
         ]
       }
     };
 
-    const NOTE_NAMES = ['C3', 'D3', 'E3', 'G3', 'A3', 'C4', 'D4', 'E4', 'G4', 'A4', 'C5', 'D5', 'E5', 'G5'];
-    const SCALE_FREQS = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99];
+    const NOTE_NAMES = ['C3', 'D3', 'E3', 'G3', 'A3', 'C4', 'D4', 'E4', 'G4', 'A4', 'C5', 'D5', 'E5', 'G5', 'A5'];
+    const SCALE_FREQS = [130.81, 146.83, 164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
 
     let activeTrack = 'rain';
     let currentData = null;
@@ -1204,14 +407,10 @@
     let ambienceActive = true;
     let chartObj = null;
 
-    // Mixer Mute States
     const channelMutes = { lead: false, bass: false, noise: false, perc: false, siren: false };
 
-    /********************************************************************
-     * 2. THREE.JS 3D INTERACTIVE WEBGL PLANET & SATELLITE ENGINE
-     ********************************************************************/
     let scene, camera, renderer, earthMesh, wireMesh, haloMesh, orbitRing, satellitePivot, starField;
-    let globeRotationSpeed = 0.004;
+    let globeRotationSpeed = 0.003;
     let isDraggingGlobe = false;
     let prevMouse = { x: 0, y: 0 };
 
@@ -1224,101 +423,64 @@
       camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
       camera.position.z = 4.6;
 
-      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, powerPreference: "high-performance" });
       renderer.setSize(width, height);
-      renderer.setPixelRatio(window.devicePixelRatio);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       container.innerHTML = '';
       container.appendChild(renderer.domElement);
 
-      // Core Planet Sphere
-      const sphereGeo = new THREE.SphereGeometry(1.25, 32, 32);
-      const sphereMat = new THREE.MeshPhongMaterial({
-        color: 0x0a192f,
-        emissive: 0x041022,
-        specular: 0x00f2fe,
-        shininess: 35,
-        transparent: true,
-        opacity: 0.92
-      });
-      earthMesh = new THREE.Mesh(sphereGeo, sphereMat);
+      earthMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(1.25, 20, 20),
+        new THREE.MeshPhongMaterial({ color: 0x0a192f, emissive: 0x041022, specular: 0x00f2fe, shininess: 25, transparent: true, opacity: 0.92 })
+      );
       scene.add(earthMesh);
 
-      // Glowing Cyber Lat/Lon Wireframe Cage
-      const wireGeo = new THREE.SphereGeometry(1.265, 22, 18);
-      const wireMat = new THREE.MeshBasicMaterial({
-        color: 0x00f2fe,
-        wireframe: true,
-        transparent: true,
-        opacity: 0.38
-      });
-      wireMesh = new THREE.Mesh(wireGeo, wireMat);
+      wireMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(1.265, 14, 12),
+        new THREE.MeshBasicMaterial({ color: 0x00f2fe, wireframe: true, transparent: true, opacity: 0.35 })
+      );
       earthMesh.add(wireMesh);
 
-      // Outer Atmospheric Plasma Halo
-      const haloGeo = new THREE.SphereGeometry(1.42, 32, 32);
-      const haloMat = new THREE.MeshBasicMaterial({
-        color: 0x00f2fe,
-        transparent: true,
-        opacity: 0.12,
-        side: THREE.BackSide
-      });
-      haloMesh = new THREE.Mesh(haloGeo, haloMat);
+      haloMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(1.42, 20, 20),
+        new THREE.MeshBasicMaterial({ color: 0x00f2fe, transparent: true, opacity: 0.12, side: THREE.BackSide })
+      );
       scene.add(haloMesh);
 
-      // Tilted Orbital Telemetry Ring
-      const ringGeo = new THREE.RingGeometry(1.68, 1.71, 64);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x38bdf8,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.55
-      });
-      orbitRing = new THREE.Mesh(ringGeo, ringMat);
+      orbitRing = new THREE.Mesh(
+        new THREE.RingGeometry(1.68, 1.71, 32),
+        new THREE.MeshBasicMaterial({ color: 0x38bdf8, side: THREE.DoubleSide, transparent: true, opacity: 0.5 })
+      );
       orbitRing.rotation.x = Math.PI / 2.4;
       orbitRing.rotation.y = 0.35;
       scene.add(orbitRing);
 
-      // Orbiting NASA Satellite Marker
       satellitePivot = new THREE.Object3D();
-      const satGeo = new THREE.OctahedronGeometry(0.08, 0);
-      const satMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const satMesh = new THREE.Mesh(satGeo, satMat);
+      const satMesh = new THREE.Mesh(new THREE.OctahedronGeometry(0.08, 0), new THREE.MeshBasicMaterial({ color: 0xffffff }));
       satMesh.position.set(1.7, 0, 0);
       satellitePivot.rotation.z = 0.4;
       satellitePivot.add(satMesh);
       scene.add(satellitePivot);
 
-      // 1,800 Deep-Space Starfield Particles
       const starGeo = new THREE.BufferGeometry();
-      const starCount = 1800;
-      const positions = new Float32Array(starCount * 3);
-      for (let i = 0; i < starCount * 3; i++) {
-        positions[i] = (Math.random() - 0.5) * 18;
-      }
+      const positions = new Float32Array(600 * 3);
+      for (let i = 0; i < 600 * 3; i++) positions[i] = (Math.random() - 0.5) * 18;
       starGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-      const starMat = new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.025 });
-      starField = new THREE.Points(starGeo, starMat);
+      starField = new THREE.Points(starGeo, new THREE.PointsMaterial({ color: 0x94a3b8, size: 0.025 }));
       scene.add(starField);
 
-      // Lights
       const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
       dirLight.position.set(5, 3, 5);
       scene.add(dirLight);
       scene.add(new THREE.AmbientLight(0x334155, 0.9));
 
-      // Interactive Mouse Drag Rotation
       const viewport = document.getElementById('globeViewport');
-      viewport.addEventListener('mousedown', (e) => {
-        isDraggingGlobe = true;
-        prevMouse = { x: e.clientX, y: e.clientY };
-      });
+      viewport.addEventListener('mousedown', (e) => { isDraggingGlobe = true; prevMouse = { x: e.clientX, y: e.clientY }; });
       window.addEventListener('mouseup', () => { isDraggingGlobe = false; });
       window.addEventListener('mousemove', (e) => {
         if (!isDraggingGlobe || !earthMesh) return;
-        const dx = e.clientX - prevMouse.x;
-        const dy = e.clientY - prevMouse.y;
-        earthMesh.rotation.y += dx * 0.008;
-        earthMesh.rotation.x += dy * 0.008;
+        earthMesh.rotation.y += (e.clientX - prevMouse.x) * 0.008;
+        earthMesh.rotation.x += (e.clientY - prevMouse.y) * 0.008;
         prevMouse = { x: e.clientX, y: e.clientY };
       });
 
@@ -1327,19 +489,10 @@
 
     function animateThreeGlobe() {
       requestAnimationFrame(animateThreeGlobe);
-      if (earthMesh && !isDraggingGlobe) {
-        earthMesh.rotation.y += globeRotationSpeed;
-      }
-      if (satellitePivot) {
-        satellitePivot.rotation.y -= globeRotationSpeed * 3.2;
-        satellitePivot.rotation.x += globeRotationSpeed * 0.8;
-      }
-      if (starField) {
-        starField.rotation.y += 0.0005;
-      }
-      if (renderer && scene && camera) {
-        renderer.render(scene, camera);
-      }
+      if (earthMesh && !isDraggingGlobe) earthMesh.rotation.y += globeRotationSpeed;
+      if (satellitePivot) satellitePivot.rotation.y -= globeRotationSpeed * 3.0;
+      if (starField) starField.rotation.y += 0.0002;
+      if (renderer && scene && camera) renderer.render(scene, camera);
     }
 
     function updateGlobeColorAndPulse(hexColor, isAnomaly, pitchNorm) {
@@ -1348,55 +501,38 @@
       wireMesh.material.color.setHex(targetHex);
       haloMesh.material.color.setHex(targetHex);
       orbitRing.material.color.setHex(targetHex);
-
-      // Scale pulse with data intensity
-      const scaleVal = 1 + (pitchNorm * 0.14);
+      const scaleVal = 1 + (pitchNorm * 0.12);
       earthMesh.scale.set(scaleVal, scaleVal, scaleVal);
-      globeRotationSpeed = isAnomaly ? 0.018 : (0.004 + pitchNorm * 0.008);
+      globeRotationSpeed = isAnomaly ? 0.014 : (0.003 + pitchNorm * 0.005);
     }
 
-    /********************************************************************
-     * 3. 5-CHANNEL STUDIO WEB AUDIO SYNTHESIZER & PROCEDURAL WEATHER DSP
-     ********************************************************************/
-    let audioCtx = null;
-    let masterAnalyser = null;
-    let masterDelay = null;
-    let delayFeedback = null;
-    let noiseBuffer = null;
+    let audioCtx = null, masterAnalyser = null, masterDelay = null, delayFeedback = null, noiseBuffer = null;
 
     function initAudioEngine() {
       if (!audioCtx) {
         const AudioContextClass = window.AudioContext || window.webkitAudioContext;
         audioCtx = new AudioContextClass();
-
-        // Master Analyser for 60FPS Oscilloscope & FFT Spectrum
         masterAnalyser = audioCtx.createAnalyser();
-        masterAnalyser.fftSize = 256;
+        masterAnalyser.fftSize = 128;
 
-        // Stereo Delay Echo DSP
         masterDelay = audioCtx.createDelay(1.0);
-        masterDelay.delayTime.value = 0.28;
+        masterDelay.delayTime.value = 0.24;
         delayFeedback = audioCtx.createGain();
-        delayFeedback.gain.value = 0.32;
+        delayFeedback.gain.value = 0.28;
 
         masterDelay.connect(delayFeedback);
         delayFeedback.connect(masterDelay);
         masterDelay.connect(masterAnalyser);
         masterAnalyser.connect(audioCtx.destination);
 
-        // Generate 2-Second Procedural White/Pink Noise Buffer for Rain/Ocean/Ice
         const sampleRate = audioCtx.sampleRate;
         noiseBuffer = audioCtx.createBuffer(1, sampleRate * 2, sampleRate);
         const output = noiseBuffer.getChannelData(0);
-        for (let i = 0; i < sampleRate * 2; i++) {
-          output[i] = Math.random() * 2 - 1;
-        }
+        for (let i = 0; i < sampleRate * 2; i++) output[i] = Math.random() * 2 - 1;
 
         drawRealTimeOscilloscope();
       }
-      if (audioCtx.state === 'suspended') {
-        audioCtx.resume();
-      }
+      if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
     function getSliderGain(id, muteKey) {
@@ -1405,7 +541,6 @@
       return el ? (Number(el.value) / 100) : 0.75;
     }
 
-    // Main Multi-Layer Sonification Trigger per Year Step
     function playMultiTrackSonification(index) {
       initAudioEngine();
       const rec = currentData.records[index];
@@ -1415,262 +550,130 @@
       const intensityNorm = rec.norm.intensity ?? 0.25;
       const prevPitch = prevRec.norm.pitch ?? 0.25;
       const deltaJump = Math.abs(pitchNorm - prevPitch);
-      const isAnomaly = deltaJump >= 0.14 || pitchNorm >= 0.85;
+      const isAnomaly = deltaJump >= 0.12 || pitchNorm >= 0.85;
 
-      // Map to Musical Scale Frequency + Dynamic Delta Boost
       const scaleIdx = Math.min(SCALE_FREQS.length - 1, Math.floor(pitchNorm * SCALE_FREQS.length));
-      const baseFreq = Math.round(SCALE_FREQS[scaleIdx] + (deltaJump * 180));
+      const baseFreq = Math.round(SCALE_FREQS[scaleIdx] + (deltaJump * 150));
       const noteName = NOTE_NAMES[scaleIdx];
-
       const now = audioCtx.currentTime;
 
-      // --- CHANNEL 1: HARMONIC LEAD SYNTH (Pluck / Pad / Cryo Lead) ---
-      const leadVol = getSliderGain('vol-lead', 'lead') * (0.22 + pitchNorm * 0.28);
+      const leadVol = getSliderGain('vol-lead', 'lead') * (0.2 + pitchNorm * 0.25);
       if (leadVol > 0.001) {
         const oscLead = audioCtx.createOscillator();
         const gainLead = audioCtx.createGain();
         oscLead.type = activeTrack === 'rain' ? 'triangle' : activeTrack === 'ocean' ? 'sine' : 'sawtooth';
         oscLead.frequency.setValueAtTime(baseFreq, now);
-
-        if (isAnomaly) {
-          oscLead.frequency.exponentialRampToValueAtTime(baseFreq * 1.25, now + 0.35);
-        }
-
         gainLead.gain.setValueAtTime(0.001, now);
         gainLead.gain.linearRampToValueAtTime(leadVol, now + 0.03);
-        gainLead.gain.exponentialRampToValueAtTime(0.0008, now + 0.85);
-
+        gainLead.gain.exponentialRampToValueAtTime(0.0008, now + 0.75);
         oscLead.connect(gainLead);
         gainLead.connect(masterAnalyser);
         gainLead.connect(masterDelay);
         oscLead.start(now);
-        oscLead.stop(now + 0.85);
-
-        // Harmonic 5th Chord Layer
-        const oscFifth = audioCtx.createOscillator();
-        const gainFifth = audioCtx.createGain();
-        oscFifth.type = 'sine';
-        oscFifth.frequency.setValueAtTime(baseFreq * 1.498, now + 0.04);
-        gainFifth.gain.setValueAtTime(leadVol * 0.45, now + 0.04);
-        gainFifth.gain.exponentialRampToValueAtTime(0.0008, now + 0.75);
-        oscFifth.connect(gainFifth);
-        gainFifth.connect(masterDelay);
-        oscFifth.start(now + 0.04);
-        oscFifth.stop(now + 0.75);
+        oscLead.stop(now + 0.75);
       }
 
-      // --- CHANNEL 2: DEEP SUB-BASS DRONE ---
-      const bassVol = getSliderGain('vol-bass', 'bass') * 0.32;
+      const bassVol = getSliderGain('vol-bass', 'bass') * 0.28;
       if (bassVol > 0.001) {
         const oscBass = audioCtx.createOscillator();
         const gainBass = audioCtx.createGain();
         oscBass.type = 'sawtooth';
-        // Low sub-register (65Hz to 140Hz)
-        const subFreq = Math.max(55, baseFreq * 0.25);
-        oscBass.frequency.setValueAtTime(subFreq, now);
-        if (activeTrack === 'glacier') {
-          // Descending glacier sub-drop
-          oscBass.frequency.exponentialRampToValueAtTime(42, now + 0.9);
-        }
-
-        // Low-pass filter for warm sub-bass
+        oscBass.frequency.setValueAtTime(Math.max(55, baseFreq * 0.25), now);
         const bassFilter = audioCtx.createBiquadFilter();
         bassFilter.type = 'lowpass';
-        bassFilter.frequency.setValueAtTime(240, now);
-
+        bassFilter.frequency.setValueAtTime(200, now);
         gainBass.gain.setValueAtTime(bassVol, now);
-        gainBass.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
-
+        gainBass.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
         oscBass.connect(bassFilter);
         bassFilter.connect(gainBass);
         gainBass.connect(masterAnalyser);
         oscBass.start(now);
-        oscBass.stop(now + 0.95);
+        oscBass.stop(now + 0.8);
       }
 
-      // --- CHANNEL 3: PROCEDURAL WEATHER / OCEAN / ICE TEXTURE ENGINE ---
-      const noiseVol = getSliderGain('vol-noise', 'noise') * (0.12 + intensityNorm * 0.28);
+      const noiseVol = getSliderGain('vol-noise', 'noise') * (0.1 + intensityNorm * 0.22);
       if (ambienceActive && noiseVol > 0.001 && noiseBuffer) {
         const noiseSrc = audioCtx.createBufferSource();
         noiseSrc.buffer = noiseBuffer;
-
         const filter = audioCtx.createBiquadFilter();
         const gainNoise = audioCtx.createGain();
-
-        if (activeTrack === 'rain') {
-          // Bandpass raindrop static + high monsoon burst
-          filter.type = 'bandpass';
-          filter.frequency.setValueAtTime(1200 + intensityNorm * 2400, now);
-          filter.Q.value = 1.8;
-        } else if (activeTrack === 'ocean') {
-          // Lowpass sweeping ocean wave surf
-          filter.type = 'lowpass';
-          filter.frequency.setValueAtTime(220, now);
-          filter.frequency.exponentialRampToValueAtTime(950 * intensityNorm + 250, now + 0.5);
-          filter.frequency.exponentialRampToValueAtTime(180, now + 1.1);
-        } else {
-          // High-Q resonant glacier ice cracking
-          filter.type = 'highpass';
-          filter.frequency.setValueAtTime(1800, now);
-        }
-
+        filter.type = activeTrack === 'rain' ? 'bandpass' : 'lowpass';
+        filter.frequency.setValueAtTime(1400, now);
         gainNoise.gain.setValueAtTime(0.001, now);
-        gainNoise.gain.linearRampToValueAtTime(noiseVol, now + 0.08);
-        gainNoise.gain.exponentialRampToValueAtTime(0.001, now + 1.0);
-
+        gainNoise.gain.linearRampToValueAtTime(noiseVol, now + 0.05);
+        gainNoise.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
         noiseSrc.connect(filter);
         filter.connect(gainNoise);
         gainNoise.connect(masterAnalyser);
         noiseSrc.start(now);
-        noiseSrc.stop(now + 1.0);
+        noiseSrc.stop(now + 0.8);
       }
 
-      // --- CHANNEL 4: RHYTHMIC PERCUSSION KICK & SONAR PULSE ---
-      const percVol = getSliderGain('vol-perc', 'perc') * 0.35;
+      const percVol = getSliderGain('vol-perc', 'perc') * 0.3;
       if (percVol > 0.001) {
-        // 808 Punch Kick on every step
         const kickOsc = audioCtx.createOscillator();
         const kickGain = audioCtx.createGain();
         kickOsc.type = 'sine';
-        kickOsc.frequency.setValueAtTime(135, now);
-        kickOsc.frequency.exponentialRampToValueAtTime(38, now + 0.18);
+        kickOsc.frequency.setValueAtTime(130, now);
+        kickOsc.frequency.exponentialRampToValueAtTime(35, now + 0.15);
         kickGain.gain.setValueAtTime(percVol, now);
-        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+        kickGain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
         kickOsc.connect(kickGain);
         kickGain.connect(masterAnalyser);
         kickOsc.start(now);
-        kickOsc.stop(now + 0.25);
+        kickOsc.stop(now + 0.2);
       }
 
-      // --- CHANNEL 5: HIGH-DELTA ANOMALY SIREN & ARPEGGIO ---
-      const sirenVol = getSliderGain('vol-siren', 'siren') * 0.35;
+      const sirenVol = getSliderGain('vol-siren', 'siren') * 0.3;
       if (isAnomaly && sirenVol > 0.001) {
-        [1, 1.25, 1.5, 2].forEach((mult, idx) => {
-          const arpOsc = audioCtx.createOscillator();
-          const arpGain = audioCtx.createGain();
-          arpOsc.type = 'triangle';
-          const startT = now + (idx * 0.07);
-          arpOsc.frequency.setValueAtTime(baseFreq * mult, startT);
-          arpGain.gain.setValueAtTime(sirenVol * 0.65, startT);
-          arpGain.gain.exponentialRampToValueAtTime(0.001, startT + 0.35);
-          arpOsc.connect(arpGain);
-          arpGain.connect(masterDelay);
-          arpOsc.start(startT);
-          arpOsc.stop(startT + 0.35);
-        });
+        const arpOsc = audioCtx.createOscillator();
+        const arpGain = audioCtx.createGain();
+        arpOsc.type = 'triangle';
+        arpOsc.frequency.setValueAtTime(baseFreq * 1.5, now);
+        arpGain.gain.setValueAtTime(sirenVol, now);
+        arpGain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+        arpOsc.connect(arpGain);
+        arpGain.connect(masterDelay);
+        arpOsc.start(now);
+        arpOsc.stop(now + 0.3);
       }
 
-      // --- OPTIONAL AI VOICE TELEMETRY SYNTH ---
       if (voiceSynthActive && 'speechSynthesis' in window) {
         window.speechSynthesis.cancel();
-        const speechText = `${rec.date}. ${rec.raw.primary} ${currentData.unitPrimary.split(' ')[0]}`;
-        const utter = new SpeechSynthesisUtterance(speechText);
-        utter.pitch = 0.65 + (pitchNorm * 1.1);
+        const utter = new SpeechSynthesisUtterance(`${rec.date}. ${rec.raw.primary}`);
+        utter.pitch = 0.8 + (pitchNorm * 0.8);
         utter.rate = 1.25;
         window.speechSynthesis.speak(utter);
       }
 
-      // Sync Visuals, 3D Globe, Table & Terminal Log
       syncAllVisuals(index, baseFreq, noteName, deltaJump, isAnomaly);
     }
 
-    // 8-Pad Live DJ Telemetry Soundboard Triggers
     function triggerSoundPad(type, btnEl) {
       initAudioEngine();
       if (btnEl) {
         btnEl.classList.add('triggered');
-        setTimeout(() => btnEl.classList.remove('triggered'), 200);
+        setTimeout(() => btnEl.classList.remove('triggered'), 160);
       }
-
       const now = audioCtx.currentTime;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-
-      if (type === 'sonar') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(1480, now);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.9);
-        osc.connect(gain);
-        gain.connect(masterDelay);
-        osc.start(now);
-        osc.stop(now + 0.9);
-        appendLog('[PAD FX] Triggered Orbital Radar Sonar Ping (1480 Hz).');
-      } else if (type === 'subdrop') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(160, now);
-        osc.frequency.exponentialRampToValueAtTime(28, now + 1.2);
-        gain.gain.setValueAtTime(0.65, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.25);
-        osc.connect(gain);
-        gain.connect(masterAnalyser);
-        osc.start(now);
-        osc.stop(now + 1.25);
-        appendLog('[PAD FX] Triggered 808 Cryo-Seismic Sub-Drop (160Hz ➔ 28Hz).', true);
-      } else if (type === 'siren') {
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(440, now);
-        osc.frequency.linearRampToValueAtTime(880, now + 0.35);
-        osc.frequency.linearRampToValueAtTime(440, now + 0.7);
-        gain.gain.setValueAtTime(0.35, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.75);
-        osc.connect(gain);
-        gain.connect(masterDelay);
-        osc.start(now);
-        osc.stop(now + 0.75);
-        appendLog('[PAD FX] Triggered High-Delta Red Alert Klaxon!', true);
-      } else if (type === 'thunder' || type === 'swell' || type === 'icecrack') {
-        const src = audioCtx.createBufferSource();
-        src.buffer = noiseBuffer;
-        const filt = audioCtx.createBiquadFilter();
-        filt.type = type === 'icecrack' ? 'bandpass' : 'lowpass';
-        filt.frequency.setValueAtTime(type === 'icecrack' ? 2200 : 380, now);
-        gain.gain.setValueAtTime(0.55, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 1.1);
-        src.connect(filt);
-        filt.connect(gain);
-        gain.connect(masterDelay);
-        src.start(now);
-        src.stop(now + 1.1);
-        appendLog(`[PAD FX] Triggered Procedural ${type.toUpperCase()} Atmospheric Burst.`);
-      } else if (type === 'geiger') {
-        for (let i = 0; i < 6; i++) {
-          const clickOsc = audioCtx.createOscillator();
-          const clickGain = audioCtx.createGain();
-          const t = now + Math.random() * 0.45;
-          clickOsc.type = 'square';
-          clickOsc.frequency.setValueAtTime(2400, t);
-          clickGain.gain.setValueAtTime(0.35, t);
-          clickGain.gain.exponentialRampToValueAtTime(0.001, t + 0.025);
-          clickOsc.connect(clickGain);
-          clickGain.connect(masterAnalyser);
-          clickOsc.start(t);
-          clickOsc.stop(t + 0.025);
-        }
-        appendLog('[PAD FX] Triggered Solar Radiation Geiger Burst.');
-      } else {
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(1200, now);
-        osc.frequency.exponentialRampToValueAtTime(220, now + 0.4);
-        gain.gain.setValueAtTime(0.4, now);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.42);
-        osc.connect(gain);
-        gain.connect(masterDelay);
-        osc.start(now);
-        osc.stop(now + 0.42);
-        appendLog('[PAD FX] Triggered Orbital Downlink Telemetry Sweep.');
-      }
+      osc.type = type === 'siren' ? 'sawtooth' : 'sine';
+      osc.frequency.setValueAtTime(type === 'subdrop' ? 150 : 880, now);
+      osc.frequency.exponentialRampToValueAtTime(type === 'subdrop' ? 30 : 220, now + 0.45);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      osc.connect(gain);
+      gain.connect(masterDelay);
+      osc.start(now);
+      osc.stop(now + 0.5);
+      appendLog(`[PAD FX] Triggered ${type.toUpperCase()} telemetry pulse.`);
     }
 
-    /********************************************************************
-     * 4. REAL-TIME 60FPS HTML5 CANVAS OSCILLOSCOPE & SPECTRUM ANALYZER
-     ********************************************************************/
     function drawRealTimeOscilloscope() {
       const canvas = document.getElementById('audioScopeCanvas');
       const ctx = canvas.getContext('2d');
-      const width = canvas.width;
-      const height = canvas.height;
-
+      const width = canvas.width, height = canvas.height;
       const freqData = new Uint8Array(masterAnalyser.frequencyBinCount);
       const timeData = new Uint8Array(masterAnalyser.frequencyBinCount);
 
@@ -1679,11 +682,10 @@
         masterAnalyser.getByteFrequencyData(freqData);
         masterAnalyser.getByteTimeDomainData(timeData);
 
-        ctx.fillStyle = 'rgba(3, 7, 18, 0.38)';
+        ctx.fillStyle = 'rgba(3, 7, 18, 0.42)';
         ctx.fillRect(0, 0, width, height);
 
-        // 1. Draw FFT Frequency Spectrum Bars
-        const barCount = 36;
+        const barCount = 28;
         const barWidth = (width / barCount) - 2;
         let peakSum = 0;
 
@@ -1691,28 +693,24 @@
           const val = freqData[i];
           peakSum += val;
           const pct = val / 255;
-          const barH = pct * (height - 10);
-          ctx.fillStyle = pct > 0.65 ? '#ff2a5f' : (activeTrack === 'rain' ? '#00f2fe' : activeTrack === 'ocean' ? '#38bdf8' : '#c084fc');
+          const barH = pct * (height - 8);
+          ctx.fillStyle = pct > 0.65 ? '#ff2a5f' : '#00f2fe';
           ctx.fillRect(i * (barWidth + 2), height - barH, barWidth, barH);
         }
 
-        // 2. Draw Glowing Oscilloscope Waveform Line Over Top
         ctx.lineWidth = 2;
         ctx.strokeStyle = '#ffffff';
         ctx.beginPath();
         const sliceWidth = width / timeData.length;
         let x = 0;
-
         for (let i = 0; i < timeData.length; i++) {
-          const v = timeData[i] / 128.0;
-          const y = (v * height) / 2;
+          const y = ((timeData[i] / 128.0) * height) / 2;
           if (i === 0) ctx.moveTo(x, y);
           else ctx.lineTo(x, y);
           x += sliceWidth;
         }
         ctx.stroke();
 
-        // Update dB Meter Readout
         const avg = peakSum / barCount;
         const db = avg > 1 ? (-45 + (avg / 255) * 44).toFixed(1) : '-48.0';
         document.getElementById('dbMeterText').innerText = `${db} dB PEAK`;
@@ -1720,32 +718,25 @@
       renderFrame();
     }
 
-    /********************************************************************
-     * 5. DATA LOADER, CHART.JS ENGINE & FULL UI SYNCHRONIZATION
-     ********************************************************************/
     async function switchTrack(trackName) {
       stopMasterAudio();
       activeTrack = trackName;
 
-      // Apply Theme CSS Variables & 3D Globe Color
       const root = document.documentElement;
       let hexTheme = 0x00f2fe;
       if (trackName === 'rain') {
         root.style.setProperty('--theme', '#00f2fe');
         root.style.setProperty('--theme-alt', '#3b82f6');
-        root.style.setProperty('--theme-glow', 'rgba(0, 242, 254, 0.45)');
         hexTheme = 0x00f2fe;
         document.getElementById('turntableTrackName').innerText = 'DISC 01: MONSOON EXTREMES';
       } else if (trackName === 'ocean') {
         root.style.setProperty('--theme', '#38bdf8');
         root.style.setProperty('--theme-alt', '#0284c7');
-        root.style.setProperty('--theme-glow', 'rgba(56, 189, 248, 0.45)');
         hexTheme = 0x38bdf8;
         document.getElementById('turntableTrackName').innerText = 'DISC 02: INDIAN OCEAN SWELL';
       } else {
         root.style.setProperty('--theme', '#c084fc');
         root.style.setProperty('--theme-alt', '#9333ea');
-        root.style.setProperty('--theme-glow', 'rgba(192, 132, 252, 0.45)');
         hexTheme = 0xc084fc;
         document.getElementById('turntableTrackName').innerText = 'DISC 03: POLAR ICE MASS LOSS';
       }
@@ -1754,24 +745,22 @@
         document.getElementById('card-' + id).className = (id === trackName) ? 'track-card active' : 'track-card';
       });
 
-      // Fetch from 2-backend (with instant fallback if server is closed)
       try {
-        const res = await fetch(`${BACKEND_URL}/${trackName}`);
-        if (!res.ok) throw new Error('Offline');
+        const res = await fetch(`/data/${trackName}`);
+        if (!res.ok) throw new Error('Fallback');
         const loaded = await res.json();
-        currentData = {
-          ...FALLBACK_ARCHIVE[trackName],
-          ...loaded
-        };
-        appendLog(`[2-BACKEND] Loaded ${trackName}.json from localhost:5000.`);
+        currentData = { ...FALLBACK_ARCHIVE[trackName], ...loaded };
+        document.getElementById('ribbonArchive').innerText = '2-BACKEND / 3-MEMORY LIVE';
       } catch (err) {
         currentData = FALLBACK_ARCHIVE[trackName];
-        appendLog(`[3-MEMORY] Loaded embedded NASA archive for ${trackName.toUpperCase()}.`);
+        document.getElementById('ribbonArchive').innerText = '3-MEMORY EMBEDDED SYNC';
       }
 
       currentIndex = 0;
       document.getElementById('missionSourceText').innerText = `SOURCE: ${currentData.source}`;
       document.getElementById('orbitCoords').innerText = currentData.coords;
+      document.getElementById('ribbonSat').innerText = currentData.satellite || 'NASA EOS';
+      document.getElementById('ribbonRes').innerText = `${currentData.records.length} HISTORICAL EPOCHS`;
       document.getElementById('kpiLabelPrimary').innerText = currentData.unitPrimary;
       document.getElementById('kpiLabelSecondary').innerText = currentData.unitSecondary;
       document.getElementById('thPrimary').innerText = currentData.unitPrimary;
@@ -1780,10 +769,7 @@
       const maxIdx = currentData.records.length - 1;
       document.getElementById('masterScrubber').max = maxIdx;
       document.getElementById('masterScrubber').value = 0;
-
-      // Render Timeline Year Ticks
-      const ticksBox = document.getElementById('timelineTicksContainer');
-      ticksBox.innerHTML = currentData.records.map(r => `<span>${r.date}</span>`).join('');
+      document.getElementById('timelineTicksContainer').innerHTML = currentData.records.map(r => `<span>${r.date}</span>`).join('');
 
       buildDataChart();
       populateArchiveTable();
@@ -1801,29 +787,28 @@
         type: 'line',
         data: {
           labels: currentData.records.map(r => r.date),
-          datasets: [
-            {
-              label: `${currentData.title} (${currentData.unitPrimary})`,
-              data: currentData.records.map(r => r.raw.primary),
-              borderColor: colorHex,
-              backgroundColor: 'rgba(0, 242, 254, 0.12)',
-              fill: true,
-              borderWidth: 3,
-              tension: 0.35,
-              pointRadius: currentData.records.map((_, i) => i === currentIndex ? 10 : 5),
-              pointBackgroundColor: currentData.records.map((_, i) => i === currentIndex ? '#ffffff' : colorHex)
-            }
-          ]
+          datasets: [{
+            label: `${currentData.title} (${currentData.unitPrimary})`,
+            data: currentData.records.map(r => r.raw.primary),
+            borderColor: colorHex,
+            backgroundColor: 'rgba(0, 242, 254, 0.1)',
+            fill: true,
+            borderWidth: 2.5,
+            tension: 0.3,
+            pointRadius: 4
+          }]
         },
         options: {
+          animation: false,
           responsive: true,
           maintainAspectRatio: false,
-          plugins: {
-            legend: { labels: { color: '#f8fafc', font: { family: 'Orbitron', size: 11 } } }
+          onClick: (e, elements) => {
+            if (elements.length > 0) scrubTimeline(elements[0].index);
           },
+          plugins: { legend: { labels: { color: '#f8fafc', font: { family: 'Orbitron', size: 10 } } } },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } }, grid: { color: 'rgba(255,255,255,0.06)' } },
-            y: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono' } }, grid: { color: 'rgba(255,255,255,0.06)' } }
+            x: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } },
+            y: { ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }, grid: { color: 'rgba(255,255,255,0.05)' } }
           }
         }
       });
@@ -1857,53 +842,39 @@
       document.getElementById('kpiValPrimary').innerText = rec.raw.primary;
       document.getElementById('kpiValSecondary').innerText = rec.raw.secondary;
       document.getElementById('kpiValFreq').innerText = `${freqHz} Hz`;
-      document.getElementById('kpiSubNote').innerText = `Musical Note: ${noteName}`;
+      document.getElementById('kpiSubNote').innerText = `Note: ${noteName}`;
       document.getElementById('kpiValDelta').innerText = index === 0 ? 'BASELINE' : `${rawDiff > 0 ? '+' : ''}${rawDiff}`;
       document.getElementById('explanationBannerText').innerText = rec.explanation;
-      document.getElementById('stepProgressText').innerText = `STEP 0${index + 1} / 0${currentData.records.length} (YEAR ${rec.date})`;
+      const stepNum = String(index + 1).padStart(2, '0');
+      const totalNum = String(currentData.records.length).padStart(2, '0');
+      document.getElementById('stepProgressText').innerText = `STEP ${stepNum} / ${totalNum} (YEAR ${rec.date})`;
       document.getElementById('masterScrubber').value = index;
 
-      // Update Anomaly Alert Styling
       const consoleEl = document.getElementById('anomalyConsole');
       const pillEl = document.getElementById('anomalyStatusPill');
       if (isAnomaly) {
         consoleEl.classList.add('alert-active');
         pillEl.className = 'status-pill critical';
-        pillEl.innerText = '⚠️ HIGH-PITCH ANOMALY SPIKE';
-        document.getElementById('orbitStatus').innerText = 'ORBIT: ANOMALY DETECTED';
-        appendLog(`[ANOMALY ${rec.date}] High delta shift! Boosted synth to ${freqHz} Hz (${noteName}).`, true);
+        pillEl.innerText = '⚠️ ANOMALY SPIKE';
+        document.getElementById('orbitStatus').innerText = 'ORBIT: ANOMALY';
+        appendLog(`[ANOMALY ${rec.date}] Value ${rec.raw.primary} ➔ Boosted to ${freqHz} Hz (${noteName})`, true);
       } else {
         consoleEl.classList.remove('alert-active');
         pillEl.className = 'status-pill';
-        pillEl.innerText = 'GRADUAL TELEMETRY SHIFT';
+        pillEl.innerText = 'TELEMETRY NOMINAL';
         document.getElementById('orbitStatus').innerText = 'ORBIT: NOMINAL';
-        appendLog(`[STEP ${rec.date}] Value: ${rec.raw.primary} ➔ Synth Note ${noteName} (${freqHz} Hz).`);
+        appendLog(`[EPOCH ${rec.date}] Primary: ${rec.raw.primary} | Synth: ${freqHz} Hz (${noteName})`);
       }
 
-      // Update 3D Globe
       const baseHex = activeTrack === 'rain' ? 0x00f2fe : activeTrack === 'ocean' ? 0x38bdf8 : 0xc084fc;
       updateGlobeColorAndPulse(baseHex, isAnomaly, rec.norm.pitch || 0.3);
 
-      // Highlight Chart Point
-      if (chartObj) {
-        const cHex = activeTrack === 'rain' ? '#00f2fe' : activeTrack === 'ocean' ? '#38bdf8' : '#c084fc';
-        chartObj.data.datasets[0].pointRadius = currentData.records.map((_, i) => i === index ? 11 : 5);
-        chartObj.data.datasets[0].pointBackgroundColor = currentData.records.map((_, i) =>
-          i === index ? (isAnomaly ? '#ff2a5f' : '#ffffff') : cHex
-        );
-        chartObj.update();
-      }
-
-      // Highlight Active Table Row
       currentData.records.forEach((_, i) => {
         const rEl = document.getElementById(`row-${i}`);
         if (rEl) rEl.className = (i === index) ? 'active-row' : '';
       });
     }
 
-    /********************************************************************
-     * 6. TRANSPORT CONTROLS, MIXER TOGGLES & UI HELPERS
-     ********************************************************************/
     function toggleMasterPlay() {
       const btn = document.getElementById('masterPlayBtn');
       const vinyl = document.getElementById('vinylDisc');
@@ -1917,7 +888,7 @@
         vinyl.classList.add('spinning');
         btn.innerText = '⏸ PAUSE SONIFICATION';
         executeStep();
-        playTimer = setInterval(executeStep, 1500 / playbackSpeed);
+        playTimer = setInterval(executeStep, 1400 / playbackSpeed);
       }
     }
 
@@ -1959,7 +930,7 @@
       });
       if (isPlaying) {
         clearInterval(playTimer);
-        playTimer = setInterval(executeStep, 1500 / playbackSpeed);
+        playTimer = setInterval(executeStep, 1400 / playbackSpeed);
       }
     }
 
@@ -1973,24 +944,19 @@
     function toggleVoiceSynth() {
       voiceSynthActive = !voiceSynthActive;
       const btn = document.getElementById('voiceBtn');
-      btn.innerText = voiceSynthActive ? '🔊 AI Voice Telemetry: ON' : '🔊 AI Voice Telemetry: OFF';
+      btn.innerText = voiceSynthActive ? '🔊 AI Voice: ON' : '🔊 AI Voice: OFF';
       btn.className = voiceSynthActive ? 'cyber-btn active' : 'cyber-btn';
     }
 
     function toggleAmbience() {
       ambienceActive = !ambienceActive;
       const btn = document.getElementById('ambienceBtn');
-      btn.innerText = ambienceActive ? '🌧️ Weather Ambience: ON' : '🌧️ Weather Ambience: OFF';
+      btn.innerText = ambienceActive ? '🌧️ Ambience: ON' : '🌧️ Ambience: OFF';
       btn.className = ambienceActive ? 'cyber-btn active' : 'cyber-btn';
     }
 
-    function toggleScanlines() {
-      document.body.classList.toggle('no-scanlines');
-    }
-
-    function toggleHighContrast() {
-      document.body.classList.toggle('high-contrast');
-    }
+    function toggleScanlines() { document.body.classList.toggle('no-scanlines'); }
+    function toggleHighContrast() { document.body.classList.toggle('high-contrast'); }
 
     function appendLog(msg, isAlert = false) {
       const box = document.getElementById('terminalLogBox');
@@ -1999,18 +965,13 @@
       div.className = isAlert ? 'log-entry alert' : 'log-entry';
       div.innerText = msg;
       box.prepend(div);
-      while (box.children.length > 25) {
-        box.removeChild(box.lastChild);
-      }
+      while (box.children.length > 20) { box.removeChild(box.lastChild); }
     }
 
-    // Live UTC Satellite Clock
     setInterval(() => {
-      const now = new Date();
-      document.getElementById('liveClockDisplay').innerText = `UTC TELEMETRY: ${now.toUTCString().toUpperCase()}`;
+      document.getElementById('liveClockDisplay').innerText = `UTC TELEMETRY: ${new Date().toUTCString().toUpperCase()}`;
     }, 1000);
 
-    // Boot Up 3D Globe & Load Initial Track
     window.addEventListener('DOMContentLoaded', () => {
       initThreeGlobe();
       switchTrack('rain');

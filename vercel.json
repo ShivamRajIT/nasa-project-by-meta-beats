@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/data/:track", "destination": "/2-backend/server.js" },
+    { "source": "/style.css", "destination": "/1-frontend/style.css" },
+    { "source": "/(.*)", "destination": "/1-frontend/index.html" }
+  ]
+}
