@@ -1,5 +1,6 @@
 /* ==========================================================================
-   META BEATS — QUANTUM PLANETARY SONIFICATION ENGINE (MASTER STYLESHEET)
+   META BEATS — JS JUKEBOX SONIFICATION (MASTER ANIMATION & HUD STYLESHEET)
+   DEVELOPER = SHIVAM RAJ
    ========================================================================== */
 
 :root {
@@ -16,13 +17,11 @@
   --theme-3: var(--p-purple);
   --theme-glow: rgba(0, 245, 212, 0.45);
   --theme-soft: rgba(0, 245, 212, 0.12);
-  --theme-border: rgba(0, 245, 212, 0.32);
+  --theme-border: rgba(0, 245, 212, 0.35);
 
   --bg-void: #020308;
-  --bg-obsidian: #050814;
-  --bg-panel: rgba(8, 13, 28, 0.86);
-  --bg-card: rgba(13, 20, 40, 0.78);
-  --bg-glass: rgba(15, 23, 42, 0.65);
+  --bg-panel: rgba(8, 13, 28, 0.88);
+  --bg-card: rgba(13, 20, 40, 0.82);
 
   --text-bright: #f8fafc;
   --text-secondary: #cbd5e1;
@@ -41,32 +40,28 @@
   --clip-tag: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
 }
 
-/* Theme Dynamic Overrides */
 body[data-track="rain"] {
   --theme: #00f5d4;
   --theme-2: #00bbf9;
-  --theme-3: #3b82f6;
   --theme-glow: rgba(0, 245, 212, 0.48);
   --theme-soft: rgba(0, 245, 212, 0.12);
-  --theme-border: rgba(0, 245, 212, 0.35);
+  --theme-border: rgba(0, 245, 212, 0.38);
 }
 
 body[data-track="ocean"] {
   --theme: #38bdf8;
   --theme-2: #818cf8;
-  --theme-3: #c084fc;
   --theme-glow: rgba(56, 189, 248, 0.48);
   --theme-soft: rgba(56, 189, 248, 0.12);
-  --theme-border: rgba(56, 189, 248, 0.35);
+  --theme-border: rgba(56, 189, 248, 0.38);
 }
 
 body[data-track="glacier"] {
   --theme: #f15bb5;
   --theme-2: #9b5de5;
-  --theme-3: #00f5d4;
   --theme-glow: rgba(241, 91, 181, 0.48);
   --theme-soft: rgba(241, 91, 181, 0.12);
-  --theme-border: rgba(241, 91, 181, 0.35);
+  --theme-border: rgba(241, 91, 181, 0.38);
 }
 
 body.high-contrast {
@@ -75,11 +70,9 @@ body.high-contrast {
   --theme-glow: rgba(254, 228, 64, 0.85) !important;
   --bg-void: #000000 !important;
   --bg-panel: #050505 !important;
-  --bg-card: #0a0a0a !important;
   --theme-border: #fee440 !important;
 }
 
-/* Base Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -87,17 +80,8 @@ body.high-contrast {
   user-select: none;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-void);
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-void); }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, var(--theme), var(--theme-2));
   border-radius: 3px;
@@ -114,113 +98,7 @@ body {
 }
 
 /* ==========================================================================
-   1. CINEMATIC QUANTUM BOOT LOADER OVERLAY
-   ========================================================================== */
-.boot-screen {
-  position: fixed;
-  inset: 0;
-  background: radial-gradient(circle at center, #080f26 0%, #020308 85%);
-  z-index: 99999;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.65s;
-}
-.boot-screen.hidden {
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-}
-
-.boot-rings {
-  position: relative;
-  width: 150px;
-  height: 150px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.boot-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 2px solid transparent;
-}
-.boot-ring.r1 {
-  inset: 0;
-  border-top-color: var(--p-cyan);
-  border-bottom-color: var(--p-cyan);
-  animation: spinCW 2.4s linear infinite;
-  box-shadow: 0 0 25px rgba(0, 245, 212, 0.3);
-}
-.boot-ring.r2 {
-  inset: 14px;
-  border-left-color: var(--p-pink);
-  border-right-color: var(--p-pink);
-  animation: spinCCW 1.8s linear infinite;
-}
-.boot-ring.r3 {
-  inset: 28px;
-  border-top-color: var(--p-blue);
-  border-right-color: var(--p-purple);
-  animation: spinCW 1.2s linear infinite;
-}
-.boot-core-logo {
-  font-family: var(--font-display);
-  font-weight: 900;
-  font-size: 14px;
-  letter-spacing: 2px;
-  color: #fff;
-  text-align: center;
-  text-shadow: 0 0 12px var(--p-cyan);
-}
-
-.boot-title {
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 900;
-  letter-spacing: 4px;
-  background: linear-gradient(90deg, var(--p-cyan), #ffffff, var(--p-pink));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  text-transform: uppercase;
-}
-
-.boot-progress-track {
-  width: 320px;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 99px;
-  overflow: hidden;
-  position: relative;
-  border: 1px solid rgba(0, 245, 212, 0.3);
-}
-.boot-progress-bar {
-  height: 100%;
-  width: 0%;
-  background: linear-gradient(90deg, var(--p-cyan), var(--p-blue), var(--p-pink));
-  box-shadow: 0 0 15px var(--p-cyan);
-  animation: fillBootBar 1.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-.boot-status-log {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: var(--p-cyan);
-  letter-spacing: 1.5px;
-}
-
-@keyframes fillBootBar {
-  0% { width: 0%; }
-  45% { width: 62%; }
-  80% { width: 88%; }
-  100% { width: 100%; }
-}
-@keyframes spinCW { 100% { transform: rotate(360deg); } }
-@keyframes spinCCW { 100% { transform: rotate(-360deg); } }
-
-/* ==========================================================================
-   2. MULTI-LAYERED ANIMATED AURORA & PERSPECTIVE HORIZON BACKGROUND
+   1. ANIMATED AURORA & CYBER GRID BACKGROUND
    ========================================================================== */
 .quantum-bg-stack {
   position: fixed;
@@ -229,45 +107,27 @@ body {
   overflow: hidden;
   pointer-events: none;
 }
-
 .aurora-blob {
   position: absolute;
-  width: 580px;
-  height: 580px;
+  width: 560px;
+  height: 560px;
   border-radius: 50%;
-  filter: blur(110px);
-  opacity: 0.16;
-  will-change: transform;
+  filter: blur(115px);
+  opacity: 0.15;
 }
 .aurora-blob.b1 {
-  top: -120px;
-  left: -100px;
+  top: -120px; left: -100px;
   background: var(--theme);
-  animation: floatAurora1 14s ease-in-out infinite alternate;
+  animation: floatAurora 14s ease-in-out infinite alternate;
 }
 .aurora-blob.b2 {
-  bottom: -150px;
-  right: -80px;
+  bottom: -150px; right: -80px;
   background: var(--theme-2);
-  animation: floatAurora2 18s ease-in-out infinite alternate;
+  animation: floatAurora 18s ease-in-out infinite alternate-reverse;
 }
-.aurora-blob.b3 {
-  top: 35%;
-  left: 42%;
-  width: 420px;
-  height: 420px;
-  background: var(--p-purple);
-  opacity: 0.1;
-  animation: floatAurora1 16s ease-in-out infinite alternate-reverse;
-}
-
-@keyframes floatAurora1 {
+@keyframes floatAurora {
   0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(80px, 50px, 0) scale(1.12); }
-}
-@keyframes floatAurora2 {
-  0% { transform: translate3d(0, 0, 0) scale(1); }
-  100% { transform: translate3d(-90px, -60px, 0) scale(1.15); }
+  100% { transform: translate3d(70px, 45px, 0) scale(1.12); }
 }
 
 .perspective-cyber-floor {
@@ -276,45 +136,25 @@ body {
   background-image:
     linear-gradient(to right, rgba(0, 245, 212, 0.04) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(0, 245, 212, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
+  background-size: 46px 46px;
   z-index: -2;
   pointer-events: none;
-  mask-image: radial-gradient(circle at 50% 35%, black 25%, transparent 90%);
-}
-
-.scanline-overlay {
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px,
-    transparent 2px,
-    rgba(0, 0, 0, 0.24) 3px,
-    rgba(0, 0, 0, 0.24) 4px
-  );
-  z-index: 999;
-  pointer-events: none;
-  opacity: 0.35;
-  transition: opacity 0.25s ease;
-}
-body.no-scanlines .scanline-overlay {
-  opacity: 0;
 }
 
 /* ==========================================================================
-   3. TOP ORBITAL TELEMETRY RIBBON & META BEATS MARQUEE
+   2. TOP TELEMETRY RIBBON & SHIVAM RAJ DEVELOPER BADGE
    ========================================================================== */
 .orbital-top-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 8px 22px;
-  background: rgba(3, 6, 16, 0.94);
+  background: rgba(3, 6, 16, 0.95);
   border-bottom: 1px solid var(--theme-border);
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-secondary);
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
@@ -323,7 +163,7 @@ body.no-scanlines .scanline-overlay {
   align-items: center;
   gap: 8px;
   padding: 4px 12px;
-  background: linear-gradient(90deg, rgba(0, 245, 212, 0.18), rgba(155, 93, 229, 0.22));
+  background: linear-gradient(90deg, rgba(0, 245, 212, 0.18), rgba(155, 93, 229, 0.25));
   border: 1px solid var(--theme);
   clip-path: var(--clip-tag);
   font-family: var(--font-display);
@@ -331,12 +171,31 @@ body.no-scanlines .scanline-overlay {
   font-weight: 900;
   color: #fff;
   letter-spacing: 1.5px;
-  box-shadow: 0 0 15px var(--theme-soft);
+}
+
+.dev-shivam-top-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background: linear-gradient(90deg, rgba(254, 228, 64, 0.18), rgba(241, 91, 181, 0.22));
+  border: 1px solid var(--p-gold);
+  border-radius: 6px;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--p-gold);
+  letter-spacing: 1.4px;
+  box-shadow: 0 0 14px rgba(254, 228, 64, 0.35);
+  animation: devBadgeGlow 2.2s infinite alternate;
+}
+@keyframes devBadgeGlow {
+  0% { box-shadow: 0 0 8px rgba(254, 228, 64, 0.25); transform: scale(1); }
+  100% { box-shadow: 0 0 18px rgba(254, 228, 64, 0.65); transform: scale(1.02); }
 }
 
 .live-pulse-led {
-  width: 8px;
-  height: 8px;
+  width: 8px; height: 8px;
   border-radius: 50%;
   background: var(--p-green);
   box-shadow: 0 0 10px var(--p-green);
@@ -350,19 +209,14 @@ body.no-scanlines .scanline-overlay {
 .top-telemetry-cluster {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   flex-wrap: wrap;
 }
-.telemetry-kv span {
-  color: var(--text-dim);
-  margin-right: 4px;
-}
-.telemetry-kv strong {
-  color: var(--theme);
-}
+.telemetry-kv span { color: var(--text-dim); margin-right: 4px; }
+.telemetry-kv strong { color: var(--theme); }
 
 /* ==========================================================================
-   4. MASTER WORKSTATION SHELL & META BEATS HERO HEADER
+   3. WORKSTATION SHELL & HERO HEADER
    ========================================================================== */
 .workstation-shell {
   max-width: 1540px;
@@ -378,7 +232,7 @@ body.no-scanlines .scanline-overlay {
   background: var(--bg-panel);
   border: 1px solid var(--theme-border);
   clip-path: var(--clip-chamfer);
-  padding: 20px 26px;
+  padding: 18px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -386,17 +240,12 @@ body.no-scanlines .scanline-overlay {
   gap: 18px;
   box-shadow: 0 14px 40px rgba(0, 0, 0, 0.65), inset 0 0 30px var(--theme-soft);
   overflow: hidden;
-  transform: translateZ(0);
 }
-
-/* Animated Laser Scanner Line Across Header */
 .meta-hero-header::after {
   content: '';
   position: absolute;
-  top: 0;
-  left: -40%;
-  width: 35%;
-  height: 2px;
+  top: 0; left: -40%;
+  width: 35%; height: 2px;
   background: linear-gradient(90deg, transparent, #ffffff, var(--theme), transparent);
   box-shadow: 0 0 16px var(--theme);
   animation: headerLaserSweep 4.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
@@ -411,11 +260,8 @@ body.no-scanlines .scanline-overlay {
   align-items: center;
   gap: 18px;
 }
-
-/* Spinning Hexagonal Sonic Reactor Emblem */
 .reactor-emblem {
-  width: 68px;
-  height: 68px;
+  width: 66px; height: 66px;
   position: relative;
   display: flex;
   align-items: center;
@@ -423,16 +269,14 @@ body.no-scanlines .scanline-overlay {
   flex-shrink: 0;
 }
 .reactor-ring-outer {
-  position: absolute;
-  inset: 0;
+  position: absolute; inset: 0;
   border-radius: 16px;
   border: 2px solid var(--theme);
   box-shadow: 0 0 20px var(--theme-glow);
   animation: morphSpin 8s linear infinite;
 }
 .reactor-ring-inner {
-  position: absolute;
-  inset: 8px;
+  position: absolute; inset: 8px;
   border-radius: 50%;
   border: 1.5px dashed var(--theme-2);
   animation: spinCCW 6s linear infinite;
@@ -442,6 +286,8 @@ body.no-scanlines .scanline-overlay {
   50% { transform: rotate(180deg); border-radius: 28px; }
   100% { transform: rotate(360deg); border-radius: 16px; }
 }
+@keyframes spinCW { 100% { transform: rotate(360deg); } }
+@keyframes spinCCW { 100% { transform: rotate(-360deg); } }
 
 .reactor-core-text {
   font-family: var(--font-display);
@@ -465,9 +311,6 @@ body.no-scanlines .scanline-overlay {
   gap: 4px;
 }
 .team-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 800;
@@ -494,20 +337,18 @@ body.no-scanlines .scanline-overlay {
   color: var(--theme);
 }
 
-/* Mode Navigation Tabs & Utility Action Buttons */
 .hero-controls-right {
   display: flex;
   align-items: center;
   gap: 10px;
   flex-wrap: wrap;
 }
-
 .nav-mode-tabs {
   display: flex;
-  background: rgba(3, 7, 18, 0.85);
+  background: rgba(3, 7, 18, 0.88);
   padding: 4px;
   border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   gap: 4px;
 }
 .mode-tab-btn {
@@ -518,15 +359,11 @@ body.no-scanlines .scanline-overlay {
   font-family: var(--font-display);
   font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.8px;
   border-radius: 7px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
-.mode-tab-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.06);
-}
+.mode-tab-btn:hover { color: #fff; background: rgba(255, 255, 255, 0.06); }
 .mode-tab-btn.active {
   background: linear-gradient(135deg, var(--theme), var(--theme-2));
   color: #02040a;
@@ -536,7 +373,7 @@ body.no-scanlines .scanline-overlay {
 
 .holo-btn {
   padding: 9px 14px;
-  background: rgba(13, 22, 44, 0.9);
+  background: rgba(13, 22, 44, 0.92);
   border: 1px solid var(--theme-border);
   clip-path: var(--clip-tag);
   color: var(--text-bright);
@@ -547,7 +384,7 @@ body.no-scanlines .scanline-overlay {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  transition: all 0.16s ease;
 }
 .holo-btn:hover {
   border-color: var(--theme);
@@ -561,9 +398,19 @@ body.no-scanlines .scanline-overlay {
   font-weight: 800;
   box-shadow: 0 0 18px var(--theme-glow);
 }
+.holo-btn.pdf-btn {
+  background: linear-gradient(135deg, rgba(254, 228, 64, 0.2), rgba(241, 91, 181, 0.25));
+  border-color: var(--p-gold);
+  color: var(--p-gold);
+}
+.holo-btn.pdf-btn:hover {
+  background: var(--p-gold);
+  color: #000;
+  box-shadow: 0 0 20px rgba(254, 228, 64, 0.7);
+}
 
 /* ==========================================================================
-   5. 3D HOLOGRAPHIC DISC SELECTOR DECK (WITH ANIMATED AUDIO WAVES)
+   4. 3-DISC SELECTOR DECK
    ========================================================================== */
 .disc-selector-deck {
   display: grid;
@@ -571,9 +418,7 @@ body.no-scanlines .scanline-overlay {
   gap: 16px;
 }
 @media (max-width: 1024px) {
-  .disc-selector-deck {
-    grid-template-columns: 1fr;
-  }
+  .disc-selector-deck { grid-template-columns: 1fr; }
 }
 
 .holo-disc-card {
@@ -581,71 +426,54 @@ body.no-scanlines .scanline-overlay {
   background: var(--bg-panel);
   border: 1px solid rgba(255, 255, 255, 0.12);
   clip-path: var(--clip-chamfer);
-  padding: 18px 20px;
+  padding: 16px 20px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+  transition: all 0.22s ease;
   overflow: hidden;
-  transform: translateZ(0);
 }
 .holo-disc-card::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
+  top: 0; left: 0;
+  width: 4px; height: 100%;
   background: var(--theme);
   opacity: 0.35;
-  transition: opacity 0.2s ease, width 0.2s ease;
 }
 .holo-disc-card:hover {
-  transform: translateY(-4px);
+  transform: translateY(-3px);
   border-color: var(--theme);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), 0 0 20px var(--theme-soft);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
 }
 .holo-disc-card.active {
   background: linear-gradient(135deg, var(--theme-soft), rgba(9, 15, 32, 0.95));
   border: 1.5px solid var(--theme);
-  box-shadow: 0 0 28px var(--theme-glow);
+  box-shadow: 0 0 26px var(--theme-glow);
 }
-.holo-disc-card.active::before {
-  opacity: 1;
-  width: 6px;
-}
+.holo-disc-card.active::before { opacity: 1; width: 6px; }
 
-.disc-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  z-index: 2;
-}
+.disc-meta { display: flex; flex-direction: column; gap: 5px; }
 .disc-mission-tag {
   font-family: var(--font-mono);
   font-size: 10px;
   font-weight: 800;
   color: var(--theme);
-  letter-spacing: 1.4px;
+  letter-spacing: 1.3px;
   text-transform: uppercase;
 }
 .disc-name {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15.5px;
   font-weight: 900;
   color: #ffffff;
 }
-.disc-specs {
-  font-size: 11.5px;
-  color: var(--text-secondary);
-}
+.disc-specs { font-size: 11.5px; color: var(--text-secondary); }
 
 .disc-visualizer-orb {
-  position: relative;
-  width: 58px;
-  height: 58px;
+  width: 56px; height: 56px;
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--theme-border);
@@ -653,16 +481,11 @@ body.no-scanlines .scanline-overlay {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  font-size: 22px;
   flex-shrink: 0;
   gap: 4px;
 }
-.mini-eq-bars {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 10px;
-}
+.mini-eq-bars { display: flex; align-items: flex-end; gap: 2px; height: 10px; }
 .mini-eq-bars span {
   width: 3px;
   background: var(--theme);
@@ -673,24 +496,21 @@ body.no-scanlines .scanline-overlay {
 .mini-eq-bars span:nth-child(2) { height: 9px; animation-delay: 0.25s; }
 .mini-eq-bars span:nth-child(3) { height: 6px; animation-delay: 0.4s; }
 .mini-eq-bars span:nth-child(4) { height: 10px; animation-delay: 0.15s; }
-
 @keyframes eqBounce {
   0% { transform: scaleY(0.35); }
   100% { transform: scaleY(1); }
 }
 
 /* ==========================================================================
-   6. VIEW SWITCHING CONTAINERS & 3-COLUMN QUANTUM COCKPIT
+   5. STUDIO VIEWS & 3-COLUMN COCKPIT
    ========================================================================== */
 .studio-view-section {
   display: none;
   flex-direction: column;
   gap: 18px;
-  animation: viewFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: viewFadeIn 0.3s ease;
 }
-.studio-view-section.active-view {
-  display: flex;
-}
+.studio-view-section.active-view { display: flex; }
 @keyframes viewFadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
@@ -698,25 +518,17 @@ body.no-scanlines .scanline-overlay {
 
 .quantum-cockpit-grid {
   display: grid;
-  grid-template-columns: 400px 1fr 360px;
+  grid-template-columns: 410px 1fr 360px;
   gap: 18px;
   align-items: stretch;
 }
 @media (max-width: 1340px) {
-  .quantum-cockpit-grid {
-    grid-template-columns: 370px 1fr;
-  }
-  .cockpit-col-right {
-    grid-column: span 2;
-  }
+  .quantum-cockpit-grid { grid-template-columns: 380px 1fr; }
+  .cockpit-col-right { grid-column: span 2; }
 }
 @media (max-width: 900px) {
-  .quantum-cockpit-grid {
-    grid-template-columns: 1fr;
-  }
-  .cockpit-col-right {
-    grid-column: span 1;
-  }
+  .quantum-cockpit-grid { grid-template-columns: 1fr; }
+  .cockpit-col-right { grid-column: span 1; }
 }
 
 .hud-module {
@@ -730,21 +542,6 @@ body.no-scanlines .scanline-overlay {
   position: relative;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
-  transform: translateZ(0);
-}
-
-/* Corner HUD Crosshair Accents */
-.hud-module::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 28px;
-  height: 28px;
-  border-top: 2px solid var(--theme);
-  border-right: 2px solid var(--theme);
-  pointer-events: none;
-  opacity: 0.65;
 }
 
 .module-header {
@@ -758,7 +555,7 @@ body.no-scanlines .scanline-overlay {
   font-family: var(--font-display);
   font-size: 12.5px;
   font-weight: 800;
-  letter-spacing: 1.2px;
+  letter-spacing: 1.1px;
   color: var(--theme);
   text-transform: uppercase;
   display: flex;
@@ -771,50 +568,56 @@ body.no-scanlines .scanline-overlay {
   font-weight: 700;
   padding: 3px 8px;
   background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 4px;
   color: var(--text-secondary);
 }
 
 /* ==========================================================================
-   7. 3D WEBGL PLANETARY VIEWPORT WITH RADAR RETICLE OVERLAY
+   6. INTERACTIVE 3D EARTH + ORBITING MOON STAGE
    ========================================================================== */
 .planetary-stage {
   position: relative;
   width: 100%;
-  height: 285px;
+  height: 295px;
   border-radius: 12px;
   background: radial-gradient(circle at center, #091a38 0%, #020308 95%);
   border: 1px solid var(--theme-border);
   overflow: hidden;
-  cursor: grab;
+  cursor: pointer;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
-.planetary-stage:active {
-  cursor: grabbing;
+.planetary-stage.globe-shockwave {
+  box-shadow: 0 0 40px var(--theme), inset 0 0 35px var(--theme);
+  border-color: #ffffff;
 }
 #threeCanvasContainer {
   width: 100%;
   height: 100%;
 }
 
-/* Rotating Radar Reticle Ring inside 3D Viewport */
-.radar-reticle-svg {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 230px;
-  height: 230px;
-  border-radius: 50%;
-  border: 1px dashed rgba(0, 245, 212, 0.25);
-  pointer-events: none;
-  animation: spinCW 24s linear infinite;
+.globe-interactive-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
 }
-.radar-reticle-svg::before {
-  content: '';
-  position: absolute;
-  inset: 22px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.globe-mini-btn {
+  flex: 1;
+  padding: 6px 8px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid var(--theme-border);
+  border-radius: 6px;
+  color: var(--text-bright);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.globe-mini-btn:hover {
+  background: var(--theme);
+  color: #000;
+  box-shadow: 0 0 12px var(--theme-glow);
 }
 
 .globe-telemetry-hud {
@@ -839,13 +642,12 @@ body.no-scanlines .scanline-overlay {
   clip-path: var(--clip-tag);
   padding: 5px 12px;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 900;
   color: var(--theme);
   box-shadow: 0 0 16px var(--theme-glow);
 }
 
-/* Holographic Turntable & Tone-Arm Strip */
 .holo-turntable-deck {
   display: flex;
   align-items: center;
@@ -853,42 +655,35 @@ body.no-scanlines .scanline-overlay {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 12px;
-  padding: 12px;
-  position: relative;
+  padding: 10px 12px;
 }
 .vinyl-platter {
-  width: 76px;
-  height: 76px;
+  width: 68px; height: 68px;
   border-radius: 50%;
   background:
-    conic-gradient(from 0deg, transparent 0deg, rgba(0, 245, 212, 0.22) 45deg, transparent 90deg, transparent 180deg, rgba(241, 91, 181, 0.22) 225deg, transparent 270deg),
+    conic-gradient(from 0deg, transparent 0deg, rgba(0, 245, 212, 0.25) 45deg, transparent 90deg, transparent 180deg, rgba(241, 91, 181, 0.25) 225deg, transparent 270deg),
     repeating-radial-gradient(#060a17 0, #060a17 3px, #162238 4px, #060a17 5px);
   border: 2.5px solid var(--theme);
-  box-shadow: 0 0 18px var(--theme-glow);
+  box-shadow: 0 0 16px var(--theme-glow);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  will-change: transform;
 }
-.vinyl-platter.spinning {
-  animation: spinCW 2.4s linear infinite;
-}
+.vinyl-platter.spinning { animation: spinCW 2.4s linear infinite; }
 .vinyl-label-center {
-  width: 28px;
-  height: 28px;
+  width: 26px; height: 26px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--theme), var(--theme-2));
   color: #02040a;
   font-family: var(--font-mono);
-  font-size: 8.5px;
+  font-size: 7.5px;
   font-weight: 900;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Dual-Mode Oscilloscope + Circular/Bar Spectrum Box */
 .analyzer-stage {
   background: #02050e;
   border: 1px solid var(--theme-border);
@@ -897,7 +692,7 @@ body.no-scanlines .scanline-overlay {
 }
 #audioScopeCanvas {
   width: 100%;
-  height: 92px;
+  height: 84px;
   display: block;
 }
 .analyzer-footer {
@@ -910,46 +705,40 @@ body.no-scanlines .scanline-overlay {
 }
 
 /* ==========================================================================
-   8. CENTER MODULE: INTERACTIVE CHART, RADIAL GAUGES & LIVE PIANO SYNTH
+   7. CENTER MODULE: CHART, KPIs, PIANO & DEEP SCIENTIFIC THEORY DOSSIER
    ========================================================================== */
 .chart-stage-container {
   background: rgba(2, 6, 16, 0.72);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 12px;
-  height: 250px;
+  height: 225px;
   position: relative;
 }
 
-/* 4-Tile Telemetry KPI & Radial Progress Matrix */
 .telemetry-kpi-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
 }
 @media (max-width: 720px) {
-  .telemetry-kpi-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
+  .telemetry-kpi-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 .kpi-holo-card {
-  background: rgba(11, 18, 38, 0.82);
+  background: rgba(11, 18, 38, 0.85);
   border: 1px solid rgba(255, 255, 255, 0.1);
   clip-path: var(--clip-tag);
-  padding: 11px 12px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
   position: relative;
-  overflow: hidden;
 }
 .kpi-holo-card::after {
   content: '';
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 2.5px;
   background: linear-gradient(90deg, var(--theme), var(--theme-2));
 }
@@ -958,28 +747,23 @@ body.no-scanlines .scanline-overlay {
   font-size: 9.5px;
   color: var(--text-dim);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
 }
 .kpi-value {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 900;
   color: var(--theme);
 }
-.kpi-subtext {
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
+.kpi-subtext { font-size: 10px; color: var(--text-secondary); }
 
-/* Live Interactive 15-Key Harmonic Synth Keyboard */
 .harmonic-keyboard-strip {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(3, 7, 18, 0.8);
+  background: rgba(3, 7, 18, 0.82);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 10px;
-  padding: 10px 12px;
+  padding: 9px 12px;
 }
 .keyboard-header {
   display: flex;
@@ -994,58 +778,54 @@ body.no-scanlines .scanline-overlay {
   gap: 4px;
 }
 .synth-key {
-  height: 44px;
+  height: 38px;
   background: linear-gradient(180deg, rgba(20, 30, 55, 0.9), rgba(8, 13, 26, 0.95));
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-bottom: 3px solid var(--theme);
   border-radius: 4px;
   color: var(--text-secondary);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 700;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding-bottom: 5px;
+  padding-bottom: 4px;
   cursor: pointer;
   transition: all 0.12s ease;
 }
-.synth-key:hover {
-  background: var(--theme-soft);
-  color: #fff;
-  transform: translateY(-2px);
-}
+.synth-key:hover { background: var(--theme-soft); color: #fff; transform: translateY(-2px); }
 .synth-key.active-key {
   background: linear-gradient(180deg, var(--theme), var(--theme-2));
   color: #02040a;
   font-weight: 900;
-  box-shadow: 0 0 15px var(--theme-glow);
-  transform: translateY(1px);
+  box-shadow: 0 0 14px var(--theme-glow);
 }
 
-/* Live Anomaly Readout Console */
-.anomaly-hud-banner {
-  background: linear-gradient(90deg, rgba(12, 20, 42, 0.95), rgba(20, 30, 58, 0.88));
+/* Deep NASA Scientific Theory Dossier Panel */
+.theory-dossier-box {
+  background: linear-gradient(90deg, rgba(10, 18, 38, 0.96), rgba(18, 28, 56, 0.9));
   border: 1px solid var(--theme-border);
   border-left: 5px solid var(--theme);
   border-radius: 10px;
   padding: 12px 16px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 8px;
 }
-.anomaly-hud-banner.alert-active {
+.theory-dossier-box.alert-active {
   border-color: var(--p-red);
   border-left: 6px solid var(--p-red);
-  background: linear-gradient(90deg, rgba(75, 10, 28, 0.92), rgba(15, 23, 42, 0.95));
-  box-shadow: 0 0 28px rgba(255, 42, 95, 0.45);
+  background: linear-gradient(90deg, rgba(65, 10, 26, 0.92), rgba(15, 23, 42, 0.96));
+  box-shadow: 0 0 25px rgba(255, 42, 95, 0.4);
 }
-.banner-copy {
-  flex: 1;
-  min-width: 240px;
+.dossier-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .banner-eyebrow {
   font-family: var(--font-mono);
@@ -1057,14 +837,24 @@ body.no-scanlines .scanline-overlay {
 .banner-headline {
   font-size: 13.5px;
   font-weight: 700;
-  color: #fff;
-  margin-top: 3px;
+  color: #ffffff;
+  line-height: 1.45;
+}
+.theory-deep-note {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  color: #e2e8f0;
+  background: rgba(2, 6, 18, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 8px 12px;
+  border-radius: 8px;
+  line-height: 1.5;
 }
 .anomaly-badge-pill {
-  padding: 6px 13px;
+  padding: 5px 12px;
   border-radius: 99px;
   font-family: var(--font-mono);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 800;
   background: rgba(16, 185, 129, 0.18);
   border: 1px solid var(--p-green);
@@ -1077,18 +867,14 @@ body.no-scanlines .scanline-overlay {
   animation: pulseCritical 0.55s infinite alternate;
 }
 @keyframes pulseCritical {
-  from { transform: scale(1); opacity: 1; }
-  to { transform: scale(1.05); opacity: 0.75; }
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
 }
 
 /* ==========================================================================
-   9. RIGHT MODULE: 5-CHANNEL DSP RACK & 8-PAD META BEATS SOUNDBOARD
+   8. RIGHT MODULE: 5-CHANNEL DSP RACK & 8-PAD SOUNDBOARD
    ========================================================================== */
-.dsp-mixer-rack {
-  display: flex;
-  flex-direction: column;
-  gap: 9px;
-}
+.dsp-mixer-rack { display: flex; flex-direction: column; gap: 9px; }
 .dsp-channel-strip {
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1105,10 +891,7 @@ body.no-scanlines .scanline-overlay {
   font-family: var(--font-mono);
   font-size: 11px;
 }
-.dsp-ch-label {
-  font-weight: 700;
-  color: var(--text-bright);
-}
+.dsp-ch-label { font-weight: 700; color: var(--text-bright); }
 .dsp-mute-btn {
   padding: 2px 8px;
   border-radius: 4px;
@@ -1125,7 +908,6 @@ body.no-scanlines .scanline-overlay {
   background: transparent;
   color: var(--text-dim);
 }
-
 input[type="range"].holo-slider {
   width: 100%;
   height: 5px;
@@ -1154,7 +936,6 @@ input[type="range"].holo-slider {
 .beat-pad-btn:hover {
   border-color: var(--theme);
   box-shadow: 0 0 14px var(--theme-glow);
-  transform: translateY(-1px);
 }
 .beat-pad-btn:active, .beat-pad-btn.triggered {
   background: var(--theme);
@@ -1164,72 +945,125 @@ input[type="range"].holo-slider {
 }
 
 /* ==========================================================================
-   10. MASTER TRANSPORT & TIMELINE SCRUBBER DECK
+   9. SPECIAL ANIMATED SPOTLIGHT FOR DEVELOPER = SHIVAM RAJ (TEAM VIEW)
    ========================================================================== */
-.master-transport-console {
-  background: var(--bg-panel);
-  border: 1px solid var(--theme-border);
+.shivam-hero-spotlight {
+  position: relative;
+  background: radial-gradient(circle at 20% 50%, rgba(0, 245, 212, 0.18), rgba(15, 23, 42, 0.96) 70%);
+  border: 2px solid var(--p-gold);
   clip-path: var(--clip-chamfer);
-  padding: 18px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.6);
-}
-.transport-bar-row {
+  padding: 28px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 24px;
+  box-shadow: 0 0 40px rgba(254, 228, 64, 0.25), inset 0 0 30px rgba(0, 245, 212, 0.15);
+  overflow: hidden;
 }
-.transport-cluster {
+.shivam-hero-spotlight::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: linear-gradient(90deg, var(--p-cyan), var(--p-gold), var(--p-pink), var(--p-cyan));
+  background-size: 300% 100%;
+  z-index: -1;
+  animation: borderFlowAnim 4s linear infinite;
+  opacity: 0.35;
+}
+@keyframes borderFlowAnim {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 300% 50%; }
+}
+
+.shivam-avatar-orb {
+  width: 96px; height: 96px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, var(--p-cyan), #050b1a 75%);
+  border: 3px solid var(--p-gold);
+  box-shadow: 0 0 30px rgba(254, 228, 64, 0.6);
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.master-launch-btn {
-  padding: 12px 24px;
-  border: none;
-  clip-path: var(--clip-tag);
-  background: linear-gradient(135deg, var(--theme), var(--theme-2));
-  color: #02040a;
+  justify-content: center;
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 28px;
   font-weight: 900;
-  letter-spacing: 1px;
-  cursor: pointer;
-  box-shadow: 0 0 24px var(--theme-glow);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  color: #fff;
+  position: relative;
+  animation: floatOrb 3s ease-in-out infinite alternate;
 }
-.master-launch-btn:hover {
-  transform: scale(1.03);
-  box-shadow: 0 0 32px var(--theme-glow);
+@keyframes floatOrb {
+  0% { transform: translateY(-4px); }
+  100% { transform: translateY(4px); }
 }
 
-.scrubber-container {
+.shivam-spotlight-title {
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 900;
+  letter-spacing: 2.5px;
+  background: linear-gradient(90deg, #ffffff, var(--p-gold), var(--p-cyan), var(--p-pink));
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: textShimmer 3.5s linear infinite;
+}
+@keyframes textShimmer {
+  0% { background-position: 0% center; }
+  100% { background-position: 250% center; }
+}
+
+.shivam-tech-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.shivam-tag {
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: rgba(0, 245, 212, 0.14);
+  border: 1px solid var(--p-cyan);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--p-cyan);
+}
+
+.meta-team-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+@media (max-width: 980px) {
+  .meta-team-grid { grid-template-columns: 1fr; }
+}
+.meta-member-card {
+  background: linear-gradient(160deg, rgba(14, 24, 50, 0.9), rgba(6, 10, 24, 0.95));
+  border: 1px solid var(--theme-border);
+  clip-path: var(--clip-chamfer);
+  padding: 18px;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-#masterScrubber {
-  width: 100%;
-  height: 9px;
-  accent-color: var(--theme);
-  cursor: pointer;
-}
-.timeline-epoch-ticks {
-  display: flex;
-  justify-content: space-between;
+.member-role-tag {
   font-family: var(--font-mono);
-  font-size: 9.5px;
-  color: var(--text-dim);
+  font-size: 10px;
+  color: var(--p-gold);
+  letter-spacing: 1.5px;
 }
+.member-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 900;
+  color: #fff;
+}
+.member-desc { font-size: 12px; color: var(--text-secondary); }
 
 /* ==========================================================================
-   11. EXTRA STUDIO VIEWS: 16-STEP SEQUENCER & META BEATS TEAM SHOWCASE
+   10. SEQUENCER, TRANSPORT & BOTTOM ARCHIVE MATRIX
    ========================================================================== */
 .sequencer-matrix-panel {
   display: grid;
@@ -1254,7 +1088,6 @@ input[type="range"].holo-slider {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.12s ease;
 }
 .seq-cell.seq-on {
   background: var(--theme);
@@ -1266,66 +1099,62 @@ input[type="range"].holo-slider {
   transform: scale(1.06);
 }
 
-/* META BEATS Team Cards */
-.meta-team-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-}
-@media (max-width: 1024px) {
-  .meta-team-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 600px) {
-  .meta-team-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.meta-member-card {
-  background: linear-gradient(160deg, rgba(14, 24, 50, 0.9), rgba(6, 10, 24, 0.95));
+.master-transport-console {
+  background: var(--bg-panel);
   border: 1px solid var(--theme-border);
   clip-path: var(--clip-chamfer);
-  padding: 20px;
+  padding: 18px 24px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  position: relative;
+  gap: 14px;
 }
-.member-role-tag {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  color: var(--p-gold);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
+.transport-bar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
 }
-.member-name {
+.transport-cluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.master-launch-btn {
+  padding: 12px 24px;
+  border: none;
+  clip-path: var(--clip-tag);
+  background: linear-gradient(135deg, var(--theme), var(--theme-2));
+  color: #02040a;
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 13px;
   font-weight: 900;
-  color: #fff;
+  letter-spacing: 1px;
+  cursor: pointer;
+  box-shadow: 0 0 24px var(--theme-glow);
 }
-.member-desc {
-  font-size: 12px;
-  color: var(--text-secondary);
+.scrubber-container { display: flex; flex-direction: column; gap: 6px; }
+#masterScrubber { width: 100%; height: 9px; accent-color: var(--theme); cursor: pointer; }
+.timeline-epoch-ticks {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  overflow-x: auto;
 }
 
-/* ==========================================================================
-   12. BOTTOM ARCHIVE MATRIX TABLE & TELEMETRY TERMINAL
-   ========================================================================== */
 .bottom-archive-grid {
   display: grid;
-  grid-template-columns: 1fr 400px;
+  grid-template-columns: 1fr 390px;
   gap: 18px;
 }
 @media (max-width: 1080px) {
-  .bottom-archive-grid {
-    grid-template-columns: 1fr;
-  }
+  .bottom-archive-grid { grid-template-columns: 1fr; }
 }
-
 .matrix-table-viewport {
-  max-height: 250px;
+  max-height: 260px;
   overflow-y: auto;
   border-radius: 8px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1334,7 +1163,7 @@ table.quantum-table {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: 11px;
   text-align: left;
 }
 table.quantum-table th {
@@ -1352,9 +1181,7 @@ table.quantum-table td {
   color: var(--text-secondary);
   cursor: pointer;
 }
-table.quantum-table tr:hover td {
-  background: rgba(255, 255, 255, 0.05);
-}
+table.quantum-table tr:hover td { background: rgba(255, 255, 255, 0.05); }
 table.quantum-table tr.active-row td {
   background: var(--theme-soft);
   color: #fff;
@@ -1366,7 +1193,7 @@ table.quantum-table tr.active-row td {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
   padding: 10px 12px;
-  height: 250px;
+  height: 260px;
   overflow-y: auto;
   font-family: var(--font-mono);
   font-size: 11px;
@@ -1379,10 +1206,7 @@ table.quantum-table tr.active-row td {
   border-left: 2px solid var(--theme);
   padding-left: 8px;
 }
-.terminal-line.alert {
-  border-left-color: var(--p-red);
-  color: #fda4af;
-}
+.terminal-line.alert { border-left-color: var(--p-red); color: #fda4af; }
 
 .meta-footer {
   display: flex;
@@ -1391,13 +1215,11 @@ table.quantum-table tr.active-row td {
   flex-wrap: wrap;
   gap: 12px;
   padding: 14px 20px;
-  background: rgba(5, 9, 20, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(5, 9, 20, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 12px;
   font-family: var(--font-mono);
   font-size: 11px;
   color: var(--text-dim);
 }
-.meta-footer strong {
-  color: var(--theme);
-}
+.meta-footer strong { color: var(--theme); }
